@@ -63,16 +63,24 @@
 
         /* 卡片 */
         .records-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
-        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; position: relative; }
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-size: 12px; font-weight: bold; color: var(--text-sub); }
         .form-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #f8fafc; outline: none; color: var(--text-main); width: 100%; }
+        
+        /* 追蹤紀錄改為多行文字框，避免字被吃掉 */
+        .track-textarea { height: 50px; resize: vertical; font-family: inherit; }
+
         .user-select-badge { background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; border: none; outline: none; cursor: pointer; width: fit-content; }
         .status-select { font-weight: bold; cursor: pointer; border-width: 2px; }
         .s-active { color: var(--tag-active); border-color: #fde68a; background: #fffbeb; }
         .s-measured { color: var(--tag-measured); border-color: #a7f3d0; background: #ecfdf5; }
         .s-closed { color: var(--tag-closed); border-color: #fecaca; background: #fef2f2; }
         .urgent-date { border-color: var(--tag-closed) !important; background: #fff5f5 !important; color: var(--tag-closed); font-weight: bold; }
+
+        /* 刪除按鈕樣式 */
+        .btn-delete-card { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
+        .btn-delete-card:hover { background: #fecaca; }
 
         @media (min-width: 1024px) { 
             body.desktop-mode .sidebar { display: flex; }
@@ -147,7 +155,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD8e3-lzsYTkzcnaBoDtAUy1P-M7uFVWUw",
@@ -163,22 +171,21 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let teamMembers = []; // 從資料庫同步的員工名單
-    let currentUserName = ""; // 當前登入者顯示名稱
-    let currentEmail = ""; // 當前登入者 Email
-    let customersData = []; // 來店客資料
+    let teamMembers = []; 
+    let currentUserName = ""; 
+    let currentEmail = ""; 
+    let customersData = []; 
     
     let currentMonth = new Date().getMonth() + 1;
     let currentFilter = "all";
 
-    // --- 登入與權限檢查 ---
     document.getElementById('btnLogin').onclick = async () => {
         const acc = document.getElementById('loginAccount').value.trim();
         const pwd = document.getElementById('loginPwd').value.trim();
         if(!acc || !pwd) { alert("請輸入帳號與密碼"); return; }
         
         try {
-            const email = `${acc}@osheng.tw`; // 背景自動補後綴
+            const email = `${acc}@osheng.tw`; 
             await signInWithEmailAndPassword(auth, email, pwd);
         } catch(err) {
             alert("登入失敗，帳號或密碼錯誤！");
@@ -189,7 +196,6 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // 確認員工是否在資料庫且狀態為 active
             const q = query(collection(db, "users"), where("email", "==", user.email));
             const qs = await getDocs(q);
             if (qs.empty) {
@@ -201,7 +207,6 @@
                 alert("您的帳號已被管理員停用！"); signOut(auth); return;
             }
 
-            // 成功登入
             currentUserName = userData.name;
             currentEmail = user.email;
             document.getElementById('login-section').style.display = 'none';
@@ -215,12 +220,10 @@
         }
     });
 
-    // --- 系統初始化與監聽 ---
     function initSystem() {
         document.getElementById('qaDate').value = new Date().toISOString().split('T')[0];
         if(window.innerWidth >= 1024) { document.getElementById('pcToggle').checked = true; document.body.classList.add('desktop-mode'); }
         
-        // 1. 即時監聽員工名單 (更新下拉選單)
         onSnapshot(collection(db, "users"), (snapshot) => {
             teamMembers = [];
             const filterSelect = document.getElementById('filterUser');
@@ -230,32 +233,28 @@
             
             snapshot.forEach(doc => {
                 const data = doc.data();
-                if(data.status === 'active') { // 只顯示在職員工
+                if(data.status === 'active') { 
                     teamMembers.push(data.name);
                     filterSelect.innerHTML += `<option value="${data.name}">👤 ${data.name} 的案件</option>`;
                     qaSelect.innerHTML += `<option value="${data.name}">${data.name}</option>`;
                 }
             });
-            // 預設選擇自己
             if(qaSelect.querySelector(`option[value="${currentUserName}"]`)) qaSelect.value = currentUserName;
             if(filterSelect.querySelector(`option[value="${currentUserName}"]`)) filterSelect.value = currentUserName;
             
-            renderData(); // 若名單更新，重新渲染卡片確保下拉正確
+            renderData(); 
         });
 
-        // 2. 即時監聽來店客資料
         onSnapshot(collection(db, "customers"), (snapshot) => {
             customersData = [];
             snapshot.forEach(doc => customersData.push({ id: doc.id, ...doc.data() }));
             
-            // 每次資料變動就檢查是否要彈窗
             checkUrgentAlerts();
             renderSidebar();
             renderData();
         });
     }
 
-    // --- UI 互動邏輯 ---
     document.getElementById('pcToggle').onchange = (e) => document.body.classList.toggle('desktop-mode', e.target.checked);
     document.getElementById('yearSelect').onchange = () => { renderSidebar(); renderData(); };
     document.getElementById('searchInput').oninput = () => renderData();
@@ -283,7 +282,6 @@
         document.getElementById('displayYM').innerHTML = `${document.getElementById('yearSelect').value}年 ${currentMonth}月 <span>公司件</span>`;
     }
 
-    // --- 核心資料渲染與寫入 ---
     function renderData() {
         const container = document.getElementById('records');
         const searchKw = document.getElementById('searchInput').value.toLowerCase();
@@ -311,7 +309,6 @@
             return matchMonth && matchSearch && matchUser && matchStatus;
         });
 
-        // 照建立日期新到舊排序
         filtered.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
 
         filtered.forEach(data => {
@@ -333,11 +330,11 @@
                     <select class="user-select-badge" data-id="${data.id}" data-field="responsible">${userOptions}</select>
                 </div>
                 <div class="form-group"><label>成交金額</label><input type="number" class="form-input" value="${data.amount || ''}" style="font-size:18px; font-weight:bold;" data-id="${data.id}" data-field="amount"></div>
-                <div class="form-group"><label>需求備註</label><textarea class="form-input" style="height:70px; resize:none;" data-id="${data.id}" data-field="info">${data.info || ''}</textarea></div>
+                <div class="form-group"><label>需求備註</label><textarea class="form-input track-textarea" data-id="${data.id}" data-field="info">${data.info || ''}</textarea></div>
                 <div class="track-group">
-                    <div style="display:flex; gap:5px; align-items:center;"><span style="font-size:12px; color:var(--text-sub);">1.</span><input type="text" class="form-input" style="padding:4px 8px;" value="${data.track1 || ''}" data-id="${data.id}" data-field="track1"></div>
-                    <div style="display:flex; gap:5px; align-items:center;"><span style="font-size:12px; color:var(--text-sub);">2.</span><input type="text" class="form-input" style="padding:4px 8px;" value="${data.track2 || ''}" data-id="${data.id}" data-field="track2"></div>
-                    <div style="display:flex; gap:5px; align-items:center;"><span style="font-size:12px; color:var(--text-sub);">3.</span><input type="text" class="form-input" style="padding:4px 8px;" value="${data.track3 || ''}" data-id="${data.id}" data-field="track3"></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">1.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track1">${data.track1 || ''}</textarea></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">2.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track2">${data.track2 || ''}</textarea></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">3.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track3">${data.track3 || ''}</textarea></div>
                 </div>
                 <div class="form-group">
                     <label>案件狀態</label>
@@ -348,11 +345,14 @@
                     </select>
                     <label style="margin-top:10px;">下次預計追蹤日</label>
                     <input type="date" class="form-input ${trackInputStyle}" value="${data.nextTrackDate || ''}" data-id="${data.id}" data-field="nextTrackDate">
+                    <span style="font-size:11px; color:#ef4444; margin-top:2px; ${trackInputStyle ? 'display:block;':'display:none;'}">*請更新日期或更改狀態以解除警告</span>
                 </div>
                 <div class="form-group">
                     <label>丈量日 / 人員</label>
                     <input type="date" class="form-input" style="margin-bottom:5px;" value="${data.measureDate || ''}" data-id="${data.id}" data-field="measureDate">
                     <input type="text" class="form-input" placeholder="人員姓名" value="${data.measurePerson || ''}" data-id="${data.id}" data-field="measurePerson">
+                    <!-- 刪除按鈕 -->
+                    <button class="btn-delete-card" data-delete-id="${data.id}">🗑️ 刪除此筆案件</button>
                 </div>
             `;
             container.appendChild(card);
@@ -368,9 +368,22 @@
                 }
             };
         });
+
+        // 綁定刪除按鈕事件
+        container.querySelectorAll('.btn-delete-card').forEach(btn => {
+            btn.onclick = async (e) => {
+                const deleteId = e.target.dataset.deleteId;
+                if (deleteId && confirm("確定要刪除這筆客戶紀錄嗎？此動作無法復原。")) {
+                    try {
+                        await deleteDoc(doc(db, "customers", deleteId));
+                    } catch (err) {
+                        alert("刪除失敗：" + err.message);
+                    }
+                }
+            };
+        });
     }
 
-    // 新增案件寫入 Firestore
     document.getElementById('btnQuickAdd').onclick = async () => {
         const date = document.getElementById('qaDate').value;
         const resp = document.getElementById('qaUser').value;
@@ -412,7 +425,6 @@
                 }
             }
         });
-        // 若有緊急事件且 modal 原本沒顯示，才打開它
         if (hasUrgent && document.getElementById('alert-modal').style.display !== 'flex') {
             document.getElementById('alert-modal').style.display = 'flex';
         }
