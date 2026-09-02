@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>歐昇 - 來店客管理系統 (優化版)</title>
+    <title>歐昇 - 來店客管理系統 </title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-notclosed: #64748b; --tag-untrackable: #ef4444; }
@@ -131,17 +131,16 @@
         </header>
         <div class="content-scroll">
             <div class="filter-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="搜尋案名...">
+                <input type="text" id="searchInput" class="search-input" placeholder="跨月份搜尋案名/電話/備註...">
                 <select id="filterUser" class="user-filter"><option value="all">👥 所有人案件</option></select>
                 <div class="tag all selected" data-filter="all">全部狀態</div>
                 <div class="tag active" data-filter="active">跟進中</div>
                 <div class="tag measured" data-filter="measured">已約丈量</div>
                 <div class="tag notclosed" data-filter="notClosed">未成交</div>
                 <div class="tag untrackable" data-filter="untrackable">無法追蹤</div>
-                <div class="tag overdue" data-filter="overdue">🚨 逾期未追蹤</div>
+                <div class="tag overdue" data-filter="overdue">🚨 全域逾期未追蹤</div>
             </div>
 
-            <!-- 主管模式下隱藏新增面板 -->
             <div class="quick-add-panel" id="quickAddPanel">
                 <div class="qa-group" style="flex:0.5;"><label>日期</label><input type="date" id="qaDate" class="qa-input"></div>
                 <div class="qa-group" style="flex:0.5;"><label>負責人</label><select id="qaUser" class="qa-select"></select></div>
@@ -301,7 +300,7 @@
 
     function renderData() {
         const container = document.getElementById('records');
-        const searchKw = document.getElementById('searchInput').value.toLowerCase();
+        const searchKw = document.getElementById('searchInput').value.toLowerCase().trim();
         const filterUser = document.getElementById('filterUser').value;
         const monthStr = `${document.getElementById('yearSelect').value}-${String(currentMonth).padStart(2, '0')}`;
         const todayStr = new Date().toISOString().split('T')[0];
@@ -311,15 +310,26 @@
 
         container.innerHTML = "";
 
+        // 判斷是否解除「單一月份」限制：有輸入搜尋字詞 OR 選擇逾期未追蹤
+        const isSearching = searchKw.length > 0;
+        const isOverdueFilter = currentFilter === 'overdue';
+
         const filtered = customersData.filter(data => {
             if (!data.createDate) return false;
-            const matchMonth = data.createDate.startsWith(monthStr);
-            const matchSearch = (data.caseName||"").toLowerCase().includes(searchKw) || (data.info||"").toLowerCase().includes(searchKw) || (data.phone||"").toLowerCase().includes(searchKw);
+
+            // 若在搜尋中或查看逾期，直接無視單一月份限制 (matchMonth = true)
+            const matchMonth = (isSearching || isOverdueFilter) ? true : data.createDate.startsWith(monthStr);
+
+            const matchSearch = (data.caseName||"").toLowerCase().includes(searchKw) || 
+                                (data.info||"").toLowerCase().includes(searchKw) || 
+                                (data.phone||"").toLowerCase().includes(searchKw);
+            
             const matchUser = filterUser === 'all' || data.responsible === filterUser;
             
             let matchStatus = false;
             if (currentFilter === 'all') matchStatus = true;
             else if (currentFilter === 'overdue') {
+                // 跨月份顯示所有已逾期的「跟進中」案件
                 if (data.status === 'active' && data.nextTrackDate) {
                     if (data.nextTrackDate < todayStr) matchStatus = true;
                 }
