@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>歐昇 - 來店客管理系統</title>
+    <title>歐昇 - 來店客管理系統 (優化版)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-closed: #ef4444; }
+        :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-notclosed: #64748b; --tag-untrackable: #ef4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; }
         
@@ -14,24 +14,23 @@
         #login-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-sidebar); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; background: #f8fafc; outline: none; }
-        .login-box input:focus { border-color: var(--primary); }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
 
         /* 彈窗 */
         #alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 450px; border-radius: 12px; overflow: hidden; }
+        .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 12px; overflow: hidden; }
         .modal-header { background: #fee2e2; color: #b91c1c; padding: 15px 20px; font-weight: bold; font-size: 18px; }
         .modal-body { padding: 20px; max-height: 50vh; overflow-y: auto; }
-        .urgent-item { background: #fff5f5; border-left: 4px solid var(--tag-closed); padding: 12px; margin-bottom: 10px; border-radius: 6px; font-size: 14px; }
+        .urgent-item { background: #fff5f5; border-left: 4px solid var(--tag-untrackable); padding: 12px; margin-bottom: 10px; border-radius: 6px; font-size: 14px; }
         .modal-footer { padding: 15px 20px; text-align: center; border-top: 1px solid var(--border); background: #f8fafc; }
-        .btn-close-modal { background: var(--tag-closed); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-close-modal { background: var(--tag-untrackable); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
 
         /* 主架構 */
         #app-section { display: none; height: 100vh; flex-direction: row; }
         .sidebar { width: 80px; background: var(--bg-sidebar); display: flex; flex-direction: column; align-items: center; padding-top: 20px; flex-shrink: 0; overflow-y: auto; }
         .year-select { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; margin-bottom: 20px; cursor: pointer; outline: none; }
         .month-list { list-style: none; width: 100%; }
-        .month-item { color: #64748b; padding: 15px 0; text-align: center; cursor: pointer; font-size: 15px; font-weight: 500; transition: 0.2s; }
+        .month-item { color: #64748b; padding: 15px 0; text-align: center; cursor: pointer; font-size: 15px; font-weight: 500; }
         .month-item.active { background: var(--primary); color: white; font-weight: bold; border-radius: 8px; margin: 0 10px; width: calc(100% - 20px); }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -40,26 +39,28 @@
         .header-title span { color: var(--primary); font-size: 18px; }
         .header-right { display: flex; align-items: center; gap: 15px; }
         .pc-toggle-label { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: bold; cursor: pointer; background: #e2e8f0; padding: 6px 12px; border-radius: 20px; }
-        
         .content-scroll { flex: 1; overflow-y: auto; padding: 25px; }
 
         /* 篩選與新增 */
-        .filter-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .search-input, .user-filter { padding: 10px 15px; border: 1px solid var(--border); border-radius: 20px; outline: none; }
         .user-filter { background: white; font-weight: bold; cursor: pointer; }
         .tag { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; border: 1px solid transparent; }
         .tag.all { background: #e0e7ff; color: var(--primary); }
         .tag.active { background: #fef3c7; color: var(--tag-active); }
         .tag.measured { background: #d1fae5; color: var(--tag-measured); }
-        .tag.closed { background: #fee2e2; color: var(--tag-closed); }
+        .tag.notclosed { background: #f1f5f9; color: var(--tag-notclosed); }
+        .tag.untrackable { background: #fee2e2; color: var(--tag-untrackable); }
         .tag.overdue { background: #ffe4e6; color: #e11d48; border: 1px solid #fda4af; }
         .tag.selected { border-color: currentColor; box-shadow: 0 0 0 1px currentColor; }
 
-        .quick-add-panel { background: var(--dark-panel); padding: 15px 25px; border-radius: 12px; display: flex; gap: 15px; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; }
-        .qa-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
+        .quick-add-panel { background: var(--dark-panel); padding: 15px 25px; border-radius: 12px; display: flex; gap: 10px; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; }
+        .qa-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
         .qa-group label { color: #94a3b8; font-size: 12px; font-weight: 500; }
         .qa-input, .qa-select { background: var(--dark-input); border: 1px solid #475569; color: white; padding: 10px 12px; border-radius: 6px; outline: none; font-size: 14px; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; height: 39px; }
+        
+        .manager-badge { background: #f43f5e; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
 
         /* 卡片 */
         .records-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
@@ -67,24 +68,25 @@
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-size: 12px; font-weight: bold; color: var(--text-sub); }
         .form-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #f8fafc; outline: none; color: var(--text-main); width: 100%; }
-        
-        /* 追蹤紀錄改為多行文字框，避免字被吃掉 */
+        .form-input:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
         .track-textarea { height: 50px; resize: vertical; font-family: inherit; }
 
         .user-select-badge { background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; border: none; outline: none; cursor: pointer; width: fit-content; }
+        .user-select-badge:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
+        
         .status-select { font-weight: bold; cursor: pointer; border-width: 2px; }
         .s-active { color: var(--tag-active); border-color: #fde68a; background: #fffbeb; }
         .s-measured { color: var(--tag-measured); border-color: #a7f3d0; background: #ecfdf5; }
-        .s-closed { color: var(--tag-closed); border-color: #fecaca; background: #fef2f2; }
-        .urgent-date { border-color: var(--tag-closed) !important; background: #fff5f5 !important; color: var(--tag-closed); font-weight: bold; }
+        .s-notclosed { color: var(--tag-notclosed); border-color: #cbd5e1; background: #f8fafc; }
+        .s-untrackable { color: var(--tag-untrackable); border-color: #fecaca; background: #fef2f2; }
+        .urgent-date { border-color: var(--tag-untrackable) !important; background: #fff5f5 !important; color: var(--tag-untrackable); font-weight: bold; }
 
-        /* 刪除按鈕樣式 */
         .btn-delete-card { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
         .btn-delete-card:hover { background: #fecaca; }
 
         @media (min-width: 1024px) { 
             body.desktop-mode .sidebar { display: flex; }
-            body.desktop-mode .card { display: grid; grid-template-columns: 150px 100px 200px 180px 150px 150px; padding: 15px 20px; gap: 20px; align-items: start;}
+            body.desktop-mode .card { display: grid; grid-template-columns: 140px 100px 120px 180px 220px 150px 140px; padding: 15px 20px; gap: 15px; align-items: start;}
             .col-person, .track-group { display: flex; flex-direction: column; gap: 5px; }
         }
         @media (max-width: 1023px) {
@@ -106,9 +108,9 @@
 
 <div id="alert-modal">
     <div class="modal-content">
-        <div class="modal-header">⚠️ 需緊急追蹤客戶 (已過期或剩<=2天)</div>
+        <div class="modal-header" id="alert-header">⚠️ 需緊急追蹤客戶</div>
         <div class="modal-body" id="alert-list"></div>
-        <div class="modal-footer"><button class="btn-close-modal" onclick="document.getElementById('alert-modal').style.display='none'">我知道了，立刻處理</button></div>
+        <div class="modal-footer"><button class="btn-close-modal" onclick="document.getElementById('alert-modal').style.display='none'">我知道了</button></div>
     </div>
 </div>
 
@@ -122,9 +124,9 @@
         <header class="header">
             <div class="header-left"><div class="header-title" id="displayYM">2026年 8月 <span>公司件</span></div></div>
             <div class="header-right">
-                <span style="font-weight:bold; font-size:14px;">👤 <span id="currentUserDisplay"></span></span>
+                <span style="font-weight:bold; font-size:14px;">👤 <span id="currentUserDisplay"></span><span id="roleBadge"></span></span>
                 <label class="pc-toggle-label"><input type="checkbox" id="pcToggle"> 💻 電腦版視圖</label>
-                <button id="btnLogout" style="border:none; background:none; color:var(--tag-closed); cursor:pointer; font-weight:bold;">登出</button>
+                <button id="btnLogout" style="border:none; background:none; color:var(--tag-untrackable); cursor:pointer; font-weight:bold;">登出</button>
             </div>
         </header>
         <div class="content-scroll">
@@ -134,15 +136,29 @@
                 <div class="tag all selected" data-filter="all">全部狀態</div>
                 <div class="tag active" data-filter="active">跟進中</div>
                 <div class="tag measured" data-filter="measured">已約丈量</div>
-                <div class="tag closed" data-filter="notClosed">未成交/無法追蹤</div>
+                <div class="tag notclosed" data-filter="notClosed">未成交</div>
+                <div class="tag untrackable" data-filter="untrackable">無法追蹤</div>
                 <div class="tag overdue" data-filter="overdue">🚨 逾期未追蹤</div>
             </div>
 
-            <div class="quick-add-panel">
-                <div class="qa-group" style="flex:0.5;"><label>建立日期</label><input type="date" id="qaDate" class="qa-input"></div>
+            <!-- 主管模式下隱藏新增面板 -->
+            <div class="quick-add-panel" id="quickAddPanel">
+                <div class="qa-group" style="flex:0.5;"><label>日期</label><input type="date" id="qaDate" class="qa-input"></div>
                 <div class="qa-group" style="flex:0.5;"><label>負責人</label><select id="qaUser" class="qa-select"></select></div>
-                <div class="qa-group"><label>客戶名稱</label><input type="text" id="qaName" class="qa-input" placeholder="輸入客戶名稱"></div>
-                <div class="qa-group" style="flex:1.5;"><label>需求備註</label><input type="text" id="qaInfo" class="qa-input" placeholder="客廳調光簾..."></div>
+                <div class="qa-group"><label>客戶名稱</label><input type="text" id="qaName" class="qa-input" placeholder="名稱"></div>
+                <div class="qa-group"><label>聯絡方式</label><input type="text" id="qaPhone" class="qa-input" placeholder="電話/LINE"></div>
+                <div class="qa-group" style="flex:1;"><label>需求備註</label><input type="text" id="qaInfo" class="qa-input" placeholder="客廳調光簾..."></div>
+                
+                <div class="qa-group" style="flex:0.6;">
+                    <label>案件狀態</label>
+                    <select id="qaStatus" class="qa-select">
+                        <option value="active">跟進中</option>
+                        <option value="measured">已約丈量</option>
+                        <option value="notClosed">未成交</option>
+                        <option value="untrackable">無法追蹤</option>
+                    </select>
+                </div>
+
                 <div class="qa-group" style="flex:0.5;"><label>下次追蹤日</label><input type="date" id="qaTrackDate" class="qa-input"></div>
                 <button class="btn-save" id="btnQuickAdd">儲存新增</button>
             </div>
@@ -173,46 +189,51 @@
 
     let teamMembers = []; 
     let currentUserName = ""; 
-    let currentEmail = ""; 
+    let currentUserRole = "staff"; 
     let customersData = []; 
     
     let currentMonth = new Date().getMonth() + 1;
     let currentFilter = "all";
+    
+    // 記錄彈窗是否顯示過，避免重複干擾
+    let hasShownAlert = false; 
 
     document.getElementById('btnLogin').onclick = async () => {
         const acc = document.getElementById('loginAccount').value.trim();
         const pwd = document.getElementById('loginPwd').value.trim();
         if(!acc || !pwd) { alert("請輸入帳號與密碼"); return; }
-        
-        try {
-            const email = `${acc}@osheng.tw`; 
-            await signInWithEmailAndPassword(auth, email, pwd);
-        } catch(err) {
-            alert("登入失敗，帳號或密碼錯誤！");
-        }
+        try { await signInWithEmailAndPassword(auth, `${acc}@osheng.tw`, pwd); } 
+        catch(err) { alert("登入失敗，帳號或密碼錯誤！"); }
     };
 
-    document.getElementById('btnLogout').onclick = () => signOut(auth);
+    document.getElementById('btnLogout').onclick = () => {
+        hasShownAlert = false; // 登出時重置彈窗狀態
+        signOut(auth);
+    };
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const q = query(collection(db, "users"), where("email", "==", user.email));
             const qs = await getDocs(q);
-            if (qs.empty) {
-                alert("查無此員工資料！"); signOut(auth); return;
-            }
+            if (qs.empty) { alert("查無此員工資料！"); signOut(auth); return; }
             
             const userData = qs.docs[0].data();
-            if (userData.status === 'disabled') {
-                alert("您的帳號已被管理員停用！"); signOut(auth); return;
-            }
+            if (userData.status === 'disabled') { alert("帳號已停用！"); signOut(auth); return; }
 
             currentUserName = userData.name;
-            currentEmail = user.email;
+            currentUserRole = userData.role || 'staff'; 
+            
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'flex';
             document.getElementById('currentUserDisplay').innerText = currentUserName;
             
+            if (currentUserRole === 'manager') {
+                document.getElementById('roleBadge').innerHTML = '<span class="manager-badge">主管</span>';
+                document.getElementById('quickAddPanel').style.display = 'none'; 
+            } else {
+                document.getElementById('roleBadge').innerHTML = '';
+                document.getElementById('quickAddPanel').style.display = 'flex';
+            }
             initSystem();
         } else {
             document.getElementById('login-section').style.display = 'flex';
@@ -241,8 +262,6 @@
             });
             if(qaSelect.querySelector(`option[value="${currentUserName}"]`)) qaSelect.value = currentUserName;
             if(filterSelect.querySelector(`option[value="${currentUserName}"]`)) filterSelect.value = currentUserName;
-            
-            renderData(); 
         });
 
         onSnapshot(collection(db, "customers"), (snapshot) => {
@@ -287,22 +306,24 @@
         const searchKw = document.getElementById('searchInput').value.toLowerCase();
         const filterUser = document.getElementById('filterUser').value;
         const monthStr = `${document.getElementById('yearSelect').value}-${String(currentMonth).padStart(2, '0')}`;
-        const today = new Date(); today.setHours(0,0,0,0);
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        const isManager = currentUserRole === 'manager';
+        const disableAttr = isManager ? 'disabled' : '';
 
         container.innerHTML = "";
 
         const filtered = customersData.filter(data => {
             if (!data.createDate) return false;
             const matchMonth = data.createDate.startsWith(monthStr);
-            const matchSearch = (data.caseName||"").toLowerCase().includes(searchKw) || (data.info||"").toLowerCase().includes(searchKw);
+            const matchSearch = (data.caseName||"").toLowerCase().includes(searchKw) || (data.info||"").toLowerCase().includes(searchKw) || (data.phone||"").toLowerCase().includes(searchKw);
             const matchUser = filterUser === 'all' || data.responsible === filterUser;
             
             let matchStatus = false;
             if (currentFilter === 'all') matchStatus = true;
             else if (currentFilter === 'overdue') {
-                if (data.status === 'active' && data.nextTrackDate) {
-                    const tDate = new Date(data.nextTrackDate); tDate.setHours(0,0,0,0);
-                    if (tDate < today) matchStatus = true;
+                if ((data.status === 'active' || data.status === 'notClosed') && data.nextTrackDate) {
+                    if (data.nextTrackDate < todayStr) matchStatus = true;
                 }
             } else matchStatus = (data.status === currentFilter);
 
@@ -313,12 +334,12 @@
 
         filtered.forEach(data => {
             let trackInputStyle = "";
-            if (data.status === 'active' && data.nextTrackDate) {
+            if ((data.status === 'active' || data.status === 'notClosed') && data.nextTrackDate) {
                 const diff = Math.ceil((new Date(data.nextTrackDate) - new Date()) / (1000 * 60 * 60 * 24));
                 if (diff <= 2) trackInputStyle = "urgent-date";
             }
 
-            const statusClassMap = { 'active': 's-active', 'measured': 's-measured', 'notClosed': 's-closed', 'untrackable': 's-closed' };
+            const statusClassMap = { 'active': 's-active', 'measured': 's-measured', 'notClosed': 's-notclosed', 'untrackable': 's-untrackable' };
             const userOptions = teamMembers.map(m => `<option value="${m}" ${m === data.responsible ? 'selected' : ''}>${m}</option>`).join('');
             
             const card = document.createElement('div');
@@ -326,80 +347,112 @@
             card.innerHTML = `
                 <div class="col-person">
                     <div style="font-size:12px; color:var(--text-sub);">${data.createDate}</div>
-                    <input type="text" class="form-input" style="font-size:16px; font-weight:bold; border:none; background:transparent; padding:0; margin-bottom:5px;" value="${data.caseName || ''}" data-id="${data.id}" data-field="caseName">
-                    <select class="user-select-badge" data-id="${data.id}" data-field="responsible">${userOptions}</select>
+                    <input type="text" class="form-input" style="font-size:16px; font-weight:bold; border:none; background:transparent; padding:0; margin-bottom:5px;" value="${data.caseName || ''}" data-id="${data.id}" data-field="caseName" ${disableAttr}>
+                    <select class="user-select-badge" data-id="${data.id}" data-field="responsible" ${disableAttr}>${userOptions}</select>
                 </div>
-                <div class="form-group"><label>成交金額</label><input type="number" class="form-input" value="${data.amount || ''}" style="font-size:18px; font-weight:bold;" data-id="${data.id}" data-field="amount"></div>
-                <div class="form-group"><label>需求備註</label><textarea class="form-input track-textarea" data-id="${data.id}" data-field="info">${data.info || ''}</textarea></div>
+                <div class="form-group"><label>成交金額</label><input type="number" class="form-input" value="${data.amount || ''}" style="font-size:18px; font-weight:bold;" data-id="${data.id}" data-field="amount" ${disableAttr}></div>
+                <div class="form-group">
+                    <label>聯絡方式</label><input type="text" class="form-input" value="${data.phone || ''}" placeholder="電話/LINE" data-id="${data.id}" data-field="phone" ${disableAttr}>
+                    <label style="margin-top:5px;">需求備註</label><textarea class="form-input track-textarea" data-id="${data.id}" data-field="info" ${disableAttr}>${data.info || ''}</textarea>
+                </div>
                 <div class="track-group">
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">1.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track1">${data.track1 || ''}</textarea></div>
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">2.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track2">${data.track2 || ''}</textarea></div>
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">3.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track3">${data.track3 || ''}</textarea></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">1.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track1" placeholder="追蹤紀錄1" ${disableAttr}>${data.track1 || ''}</textarea></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">2.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track2" placeholder="追蹤紀錄2" ${disableAttr}>${data.track2 || ''}</textarea></div>
+                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">3.</span><textarea class="form-input track-textarea" data-id="${data.id}" data-field="track3" placeholder="追蹤紀錄3" ${disableAttr}>${data.track3 || ''}</textarea></div>
                 </div>
                 <div class="form-group">
                     <label>案件狀態</label>
-                    <select class="form-input status-select ${statusClassMap[data.status]}" data-id="${data.id}" data-field="status">
+                    <select class="form-input status-select ${statusClassMap[data.status]}" data-id="${data.id}" data-field="status" ${disableAttr}>
                         <option value="active" ${data.status === 'active'?'selected':''}>跟進中</option>
                         <option value="measured" ${data.status === 'measured'?'selected':''}>已約丈量</option>
-                        <option value="notClosed" ${data.status === 'notClosed'?'selected':''}>未成交 / 無法追蹤</option>
+                        <option value="notClosed" ${data.status === 'notClosed'?'selected':''}>未成交</option>
+                        <option value="untrackable" ${data.status === 'untrackable'?'selected':''}>無法追蹤</option>
                     </select>
                     <label style="margin-top:10px;">下次預計追蹤日</label>
-                    <input type="date" class="form-input ${trackInputStyle}" value="${data.nextTrackDate || ''}" data-id="${data.id}" data-field="nextTrackDate">
-                    <span style="font-size:11px; color:#ef4444; margin-top:2px; ${trackInputStyle ? 'display:block;':'display:none;'}">*請更新日期或更改狀態以解除警告</span>
+                    <input type="date" class="form-input ${trackInputStyle}" value="${data.nextTrackDate || ''}" data-id="${data.id}" data-field="nextTrackDate" ${disableAttr}>
                 </div>
                 <div class="form-group">
                     <label>丈量日 / 人員</label>
-                    <input type="date" class="form-input" style="margin-bottom:5px;" value="${data.measureDate || ''}" data-id="${data.id}" data-field="measureDate">
-                    <input type="text" class="form-input" placeholder="人員姓名" value="${data.measurePerson || ''}" data-id="${data.id}" data-field="measurePerson">
-                    <!-- 刪除按鈕 -->
-                    <button class="btn-delete-card" data-delete-id="${data.id}">🗑️ 刪除此筆案件</button>
+                    <input type="date" class="form-input" style="margin-bottom:5px;" value="${data.measureDate || ''}" data-id="${data.id}" data-field="measureDate" ${disableAttr}>
+                    <input type="text" class="form-input" placeholder="人員姓名" value="${data.measurePerson || ''}" data-id="${data.id}" data-field="measurePerson" ${disableAttr}>
+                    ${!isManager ? `<button class="btn-delete-card" data-delete-id="${data.id}">🗑️ 刪除案件</button>` : ''}
                 </div>
             `;
             container.appendChild(card);
         });
 
-        // 綁定更新事件寫入 Firestore
-        container.querySelectorAll('input, textarea, select').forEach(el => {
-            el.onchange = async (e) => {
-                const id = e.target.dataset.id;
-                const field = e.target.dataset.field;
-                if(id && field) {
-                    await updateDoc(doc(db, "customers", id), { [field]: e.target.value });
-                }
-            };
-        });
+        if (!isManager) {
+            container.querySelectorAll('input, textarea, select').forEach(el => {
+                el.onchange = async (e) => {
+                    const id = e.target.dataset.id;
+                    const field = e.target.dataset.field;
+                    let val = e.target.value;
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const rowData = customersData.find(d => d.id === id);
 
-        // 綁定刪除按鈕事件
-        container.querySelectorAll('.btn-delete-card').forEach(btn => {
-            btn.onclick = async (e) => {
-                const deleteId = e.target.dataset.deleteId;
-                if (deleteId && confirm("確定要刪除這筆客戶紀錄嗎？此動作無法復原。")) {
-                    try {
-                        await deleteDoc(doc(db, "customers", deleteId));
-                    } catch (err) {
-                        alert("刪除失敗：" + err.message);
+                    if (field === 'status' && (val === 'active' || val === 'notClosed')) {
+                        if (!rowData.nextTrackDate) {
+                            alert("⚠️ 狀態為「跟進中」或「未成交」時，必須填寫「下次預計追蹤日」！請先設定日期。");
+                            e.target.value = rowData.status; 
+                            return;
+                        }
                     }
-                }
-            };
-        });
+
+                    if ((field === 'track1' || field === 'track2' || field === 'track3') && val.trim() !== "") {
+                        if (!rowData.nextTrackDate || rowData.nextTrackDate <= todayStr) {
+                            const newDate = prompt("⚠️ 您新增了追蹤紀錄，請輸入「下一次」的預計追蹤日期 (格式 YYYY-MM-DD，需大於今天)：", "");
+                            if (newDate && newDate > todayStr) {
+                                await updateDoc(doc(db, "customers", id), { nextTrackDate: newDate });
+                            } else {
+                                alert("日期無效或小於今日，追蹤紀錄無法儲存。");
+                                e.target.value = rowData[field] || ''; 
+                                return;
+                            }
+                        }
+                    }
+
+                    if(id && field) {
+                        await updateDoc(doc(db, "customers", id), { [field]: val });
+                    }
+                };
+            });
+
+            container.querySelectorAll('.btn-delete-card').forEach(btn => {
+                btn.onclick = async (e) => {
+                    const deleteId = e.target.dataset.deleteId;
+                    if (deleteId && confirm("確定要刪除這筆客戶紀錄嗎？此動作無法復原。")) {
+                        await deleteDoc(doc(db, "customers", deleteId));
+                    }
+                };
+            });
+        }
     }
 
     document.getElementById('btnQuickAdd').onclick = async () => {
         const date = document.getElementById('qaDate').value;
         const resp = document.getElementById('qaUser').value;
         const name = document.getElementById('qaName').value.trim();
+        const phone = document.getElementById('qaPhone').value.trim();
         const info = document.getElementById('qaInfo').value.trim();
+        const status = document.getElementById('qaStatus').value;
         const tDate = document.getElementById('qaTrackDate').value;
+        const todayStr = new Date().toISOString().split('T')[0];
 
         if (!name) { alert("請輸入客戶名稱！"); return; }
+        
+        if ((status === 'active' || status === 'notClosed') && (!tDate || tDate <= todayStr)) { 
+            alert("⚠️ 狀態為「跟進中」或「未成交」時，請務必選擇大於今天的「下次追蹤日」！"); return; 
+        }
 
         await addDoc(collection(db, "customers"), {
-            createDate: date, caseName: name, responsible: resp,
+            createDate: date, caseName: name, responsible: resp, phone: phone,
             info: info, nextTrackDate: tDate, track1: "", track2: "", track3: "",
-            status: "active", measureDate: "", measurePerson: "", amount: ""
+            status: status, measureDate: "", measurePerson: "", amount: "" 
         });
         
-        document.getElementById('qaName').value = ""; document.getElementById('qaInfo').value = ""; document.getElementById('qaTrackDate').value = "";
+        document.getElementById('qaName').value = ""; document.getElementById('qaPhone').value = ""; 
+        document.getElementById('qaInfo').value = ""; document.getElementById('qaTrackDate').value = "";
+        document.getElementById('qaStatus').value = "active"; 
         
         document.getElementById('yearSelect').value = date.split('-')[0];
         currentMonth = parseInt(date.split('-')[1], 10);
@@ -411,22 +464,39 @@
         const alertList = document.getElementById('alert-list');
         alertList.innerHTML = "";
         let hasUrgent = false;
-        const today = new Date(); today.setHours(0,0,0,0);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isManager = currentUserRole === 'manager';
+
+        if (isManager) document.getElementById('alert-header').innerText = "⚠️ 全公司逾期追蹤名單";
+        else document.getElementById('alert-header').innerText = "⚠️ 您的緊急追蹤客戶 (已逾期或剩<=2天)";
 
         customersData.forEach(data => {
-            if (data.responsible === currentUserName && data.status === 'active' && data.nextTrackDate) {
-                const tDate = new Date(data.nextTrackDate); tDate.setHours(0,0,0,0);
-                const diffDays = Math.ceil((tDate - today) / (1000 * 60 * 60 * 24));
-                if (diffDays <= 2) {
-                    hasUrgent = true;
-                    let txt = diffDays < 0 ? `<span style="color:red; font-weight:bold;">已逾期 ${Math.abs(diffDays)} 天沒追蹤！</span>` : `剩餘 ${diffDays} 天`;
-                    if (diffDays === 0) txt = "就是今天！";
-                    alertList.innerHTML += `<div class="urgent-item"><strong>${data.caseName}</strong> <br> 預計日：${data.nextTrackDate} (${txt})</div>`;
+            if (data.status === 'active' || data.status === 'notClosed') {
+                if (isManager || data.responsible === currentUserName) {
+                    if (data.nextTrackDate) {
+                        const diffDays = Math.ceil((new Date(data.nextTrackDate) - new Date(todayStr)) / (1000 * 60 * 60 * 24));
+                        if (diffDays <= 2) {
+                            hasUrgent = true;
+                            let txt = diffDays < 0 ? `<span style="color:red; font-weight:bold;">已逾期 ${Math.abs(diffDays)} 天沒追蹤！</span>` : `剩餘 ${diffDays} 天`;
+                            if (diffDays === 0) txt = "就是今天！";
+                            const respName = isManager ? ` <span style="background:#e0e7ff;color:#4338ca;padding:2px 6px;border-radius:4px;font-size:12px;">${data.responsible}</span>` : '';
+                            alertList.innerHTML += `<div class="urgent-item"><strong>${data.caseName}</strong> ${respName}<br>預計日：${data.nextTrackDate} (${txt})</div>`;
+                        }
+                    } else {
+                        if (isManager || data.responsible === currentUserName) {
+                            hasUrgent = true;
+                            const respName = isManager ? ` <span style="background:#e0e7ff;color:#4338ca;padding:2px 6px;border-radius:4px;font-size:12px;">${data.responsible}</span>` : '';
+                            alertList.innerHTML += `<div class="urgent-item"><strong>${data.caseName}</strong> ${respName}<br><span style="color:red; font-weight:bold;">⚠️ 狀態異常：未填寫追蹤日期！</span></div>`;
+                        }
+                    }
                 }
             }
         });
-        if (hasUrgent && document.getElementById('alert-modal').style.display !== 'flex') {
+        
+        // 只有在還沒顯示過的情況下，才把彈窗叫出來
+        if (hasUrgent && !hasShownAlert) {
             document.getElementById('alert-modal').style.display = 'flex';
+            hasShownAlert = true; 
         }
     }
 </script>
