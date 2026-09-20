@@ -6,7 +6,7 @@
     <title>歐昇 - 來店客管理系統 </title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-notclosed: #64748b; --tag-untrackable: #ef4444; }
+        :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-notclosed: #64748b; --tag-untrackable: #ef4444; --tag-dealt: #8b5cf6; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; }
         
@@ -52,6 +52,7 @@
         .tag.notclosed { background: #f1f5f9; color: var(--tag-notclosed); }
         .tag.untrackable { background: #fee2e2; color: var(--tag-untrackable); }
         .tag.overdue { background: #ffe4e6; color: #e11d48; border: 1px solid #fda4af; }
+        .tag.dealt { background: #ede9fe; color: var(--tag-dealt); }
         .tag.selected { border-color: currentColor; box-shadow: 0 0 0 1px currentColor; }
 
         .quick-add-panel { background: var(--dark-panel); padding: 15px 25px; border-radius: 12px; display: flex; gap: 10px; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; }
@@ -79,6 +80,7 @@
         .s-measured { color: var(--tag-measured); border-color: #a7f3d0; background: #ecfdf5; }
         .s-notclosed { color: var(--tag-notclosed); border-color: #cbd5e1; background: #f8fafc; }
         .s-untrackable { color: var(--tag-untrackable); border-color: #fecaca; background: #fef2f2; }
+        .s-dealt { color: var(--tag-dealt); border-color: #ddd6fe; background: #f5f3ff; }
         .urgent-date { border-color: var(--tag-untrackable) !important; background: #fff5f5 !important; color: var(--tag-untrackable); font-weight: bold; }
 
         .btn-delete-card { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
@@ -138,6 +140,7 @@
                 <div class="tag measured" data-filter="measured">已約丈量</div>
                 <div class="tag notclosed" data-filter="notClosed">未成交</div>
                 <div class="tag untrackable" data-filter="untrackable">無法追蹤</div>
+                <div class="tag dealt" data-filter="dealt">已成交</div>
                 <div class="tag overdue" data-filter="overdue">🚨 全域逾期未追蹤</div>
             </div>
 
@@ -155,6 +158,7 @@
                         <option value="measured">已約丈量</option>
                         <option value="notClosed">未成交</option>
                         <option value="untrackable">無法追蹤</option>
+                        <option value="dealt">已成交</option>
                     </select>
                 </div>
 
@@ -347,7 +351,7 @@
                 if (diff <= 2) trackInputStyle = "urgent-date";
             }
 
-            const statusClassMap = { 'active': 's-active', 'measured': 's-measured', 'notClosed': 's-notclosed', 'untrackable': 's-untrackable' };
+            const statusClassMap = { 'active': 's-active', 'measured': 's-measured', 'notClosed': 's-notclosed', 'untrackable': 's-untrackable', 'dealt': 's-dealt' };
             const userOptions = teamMembers.map(m => `<option value="${m}" ${m === data.responsible ? 'selected' : ''}>${m}</option>`).join('');
             
             const card = document.createElement('div');
@@ -375,6 +379,7 @@
                         <option value="measured" ${data.status === 'measured'?'selected':''}>已約丈量</option>
                         <option value="notClosed" ${data.status === 'notClosed'?'selected':''}>未成交</option>
                         <option value="untrackable" ${data.status === 'untrackable'?'selected':''}>無法追蹤</option>
+                        <option value="dealt" ${data.status === 'dealt'?'selected':''}>已成交</option>
                     </select>
                     <label style="margin-top:10px;">下次預計追蹤日</label>
                     <input type="date" class="form-input field-update ${trackInputStyle}" value="${data.nextTrackDate || ''}" data-id="${data.id}" data-field="nextTrackDate" ${disableAttr}>
