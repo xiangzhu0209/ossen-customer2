@@ -116,7 +116,10 @@
         .form-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; color: var(--text-main); width: 100%; }
         .form-input:focus { border-color: var(--primary); background: #fff; }
         .form-input:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
+        
         .track-textarea { height: 52px; resize: vertical; line-height: 1.5; }
+        .info-textarea { height: 110px; resize: vertical; line-height: 1.5; } /* 新增的需求備註加高樣式 */
+        
         .track-group { display: flex; flex-direction: column; gap: 5px; }
         .track-row { display: flex; gap: 5px; align-items: flex-start; }
         .track-index { font-size: 12px; color: var(--text-sub); padding-top: 9px; min-width: 15px; }
@@ -287,7 +290,7 @@
             <div class="qa-group"><label>負責人</label><select id="qaUser" class="qa-select"></select></div>
             <div class="qa-group full"><label>客戶名稱</label><input type="text" id="qaName" class="qa-input" placeholder="名稱"></div>
             <div class="qa-group full"><label>聯絡方式</label><input type="text" id="qaPhone" class="qa-input" placeholder="電話/LINE"></div>
-            <div class="qa-group full"><label>需求備註</label><input type="text" id="qaInfo" class="qa-input" placeholder="客廳調光簾..."></div>
+            <div class="qa-group full"><label>需求備註</label><textarea id="qaInfo" class="qa-input info-textarea" placeholder="客廳調光簾..."></textarea></div>
             <div class="qa-group">
                 <label>案件狀態</label>
                 <select id="qaStatus" class="qa-select">
@@ -528,6 +531,14 @@
         document.getElementById('mobileYearSelect').value = document.getElementById('yearSelect').value;
         const list = document.getElementById('monthList');
         list.innerHTML = "";
+        
+        // 新增整年度選項
+        const liAll = document.createElement('li');
+        liAll.className = `month-item ${currentMonth === 'all' ? 'active' : ''}`;
+        liAll.innerText = `整年度`;
+        liAll.onclick = () => { currentMonth = 'all'; renderSidebar(); renderData(); };
+        list.appendChild(liAll);
+
         for (let i = 1; i <= 12; i++) {
             const li = document.createElement('li');
             li.className = `month-item ${i === currentMonth ? 'active' : ''}`;
@@ -535,7 +546,10 @@
             li.onclick = () => { currentMonth = i; renderSidebar(); renderData(); };
             list.appendChild(li);
         }
-        document.getElementById('displayYM').innerHTML = `${document.getElementById('yearSelect').value}年 ${currentMonth}月 <span>公司件</span>`;
+        
+        // 更新上方標題
+        const monthText = currentMonth === 'all' ? '整年度' : `${currentMonth}月`;
+        document.getElementById('displayYM').innerHTML = `${document.getElementById('yearSelect').value}年 ${monthText} <span>公司件</span>`;
         renderMonthBar();
     }
 
@@ -543,6 +557,15 @@
     function renderMonthBar() {
         const scroll = document.getElementById('mobileMonthScroll');
         scroll.innerHTML = "";
+        
+        // 新增整年度選項
+        const btnAll = document.createElement('button');
+        btnAll.type = 'button';
+        btnAll.className = `mobile-month-chip ${currentMonth === 'all' ? 'active' : ''}`;
+        btnAll.innerText = `整年度`;
+        btnAll.onclick = () => { currentMonth = 'all'; renderSidebar(); renderData(); };
+        scroll.appendChild(btnAll);
+
         for (let i = 1; i <= 12; i++) {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -566,7 +589,7 @@
         });
 
         const cells = [
-            { label: crossMonth ? '符合案件數' : `${currentMonth}月案件數`, value: list.length, tone: 'total' },
+            { label: crossMonth ? '符合案件數' : (currentMonth === 'all' ? '整年度案件數' : `${currentMonth}月案件數`), value: list.length, tone: 'total' },
             { label: '跟進中', value: counts.active, tone: 'active' },
             { label: '已約丈量', value: counts.measured, tone: 'measured' },
             { label: '未成交', value: counts.notClosed, tone: 'notclosed' },
@@ -584,7 +607,8 @@
         const container = document.getElementById('records');
         const searchKw = document.getElementById('searchInput').value.toLowerCase().trim();
         const filterUser = document.getElementById('filterUser').value;
-        const monthStr = `${document.getElementById('yearSelect').value}-${String(currentMonth).padStart(2, '0')}`;
+        const yearVal = document.getElementById('yearSelect').value;
+        const searchPrefix = currentMonth === 'all' ? yearVal : `${yearVal}-${String(currentMonth).padStart(2, '0')}`;
         const todayStr = todayString();
 
         const isManager = currentUserRole === 'manager';
@@ -599,7 +623,7 @@
         // 統計範圍：月份 + 搜尋 + 負責人（不受狀態標籤影響）
         const scoped = customersData.filter(data => {
             if (!data.createDate) return false;
-            const matchMonth = (isSearching || isOverdueFilter) ? true : data.createDate.startsWith(monthStr);
+            const matchMonth = (isSearching || isOverdueFilter) ? true : data.createDate.startsWith(searchPrefix);
             const matchSearch = (data.caseName || "").toLowerCase().includes(searchKw) ||
                                 (data.info || "").toLowerCase().includes(searchKw) ||
                                 (data.phone || "").toLowerCase().includes(searchKw);
@@ -667,7 +691,7 @@
                     </div>
                     <div class="form-group">
                         <label>需求備註</label>
-                        <textarea class="form-input track-textarea field-update" placeholder="需求、偏好、注意事項..." data-id="${esc(data.id)}" data-field="info" ${disableAttr}>${esc(data.info || '')}</textarea>
+                        <textarea class="form-input info-textarea field-update" placeholder="需求、偏好、注意事項..." data-id="${esc(data.id)}" data-field="info" ${disableAttr}>${esc(data.info || '')}</textarea>
                     </div>
                     <div class="track-group">
                         <div class="track-row"><span class="track-index">1.</span><textarea class="form-input track-textarea field-update" data-id="${esc(data.id)}" data-field="track1" placeholder="追蹤紀錄1" ${disableAttr}>${esc(data.track1 || '')}</textarea></div>
