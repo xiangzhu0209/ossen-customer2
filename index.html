@@ -3,106 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>歐昇 - 來店客管理系統 </title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>歐昇 - 來店客管理系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8; --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54; --tag-active: #f59e0b; --tag-measured: #10b981; --tag-notclosed: #64748b; --tag-untrackable: #ef4444; --tag-dealt: #8b5cf6; }
+        :root {
+            --bg-app: #f4f6f9; --bg-sidebar: #192033; --primary: #6366f1; --text-main: #334155; --text-sub: #94a3b8;
+            --border: #e2e8f0; --dark-panel: #262f45; --dark-input: #333d54;
+            --font-serif: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'Songti TC', 'PingFang TC', 'Microsoft JhengHei', serif;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; }
-        
+        body { font-family: var(--font-serif); background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+        input, select, textarea, button { font-family: inherit; }
+
         /* 登入區 */
         #login-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-sidebar); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; background: #f8fafc; outline: none; }
-        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .login-box { background: #fff; padding: 40px; border-radius: 12px; width: 90%; max-width: 360px; text-align: center; }
+        .login-box h2 { margin-bottom: 25px; color: var(--bg-sidebar); font-size: 22px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; background: #f8fafc; outline: none; color: var(--text-main); }
+        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; }
 
         /* 彈窗 */
-        #alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; justify-content: center; align-items: center; }
-        .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 12px; overflow: hidden; }
-        .modal-header { background: #fee2e2; color: #b91c1c; padding: 15px 20px; font-weight: bold; font-size: 18px; }
-        .modal-body { padding: 20px; max-height: 50vh; overflow-y: auto; }
-        .urgent-item { background: #fff5f5; border-left: 4px solid var(--tag-untrackable); padding: 12px; margin-bottom: 10px; border-radius: 6px; font-size: 14px; }
+        #alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; justify-content: center; align-items: center; padding: 16px; }
+        .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; overflow: hidden; }
+        .modal-header { background: #fee2e2; color: #b91c1c; padding: 15px 20px; font-weight: 700; font-size: 17px; }
+        .modal-body { padding: 20px; max-height: 55vh; overflow-y: auto; }
+        .urgent-item { background: #fff5f5; border-left: 4px solid #9f1239; padding: 12px; margin-bottom: 10px; border-radius: 6px; font-size: 14px; line-height: 1.6; }
         .modal-footer { padding: 15px 20px; text-align: center; border-top: 1px solid var(--border); background: #f8fafc; }
-        .btn-close-modal { background: var(--tag-untrackable); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-close-modal { background: #9f1239; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; }
 
         /* 主架構 */
         #app-section { display: none; height: 100vh; flex-direction: row; }
         .sidebar { width: 80px; background: var(--bg-sidebar); display: flex; flex-direction: column; align-items: center; padding-top: 20px; flex-shrink: 0; overflow-y: auto; }
-        .year-select { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; margin-bottom: 20px; cursor: pointer; outline: none; }
+        .year-select { background: transparent; color: #fff; border: none; font-size: 15px; font-weight: 700; margin-bottom: 20px; cursor: pointer; outline: none; }
         .month-list { list-style: none; width: 100%; }
         .month-item { color: #64748b; padding: 15px 0; text-align: center; cursor: pointer; font-size: 15px; font-weight: 500; }
-        .month-item.active { background: var(--primary); color: white; font-weight: bold; border-radius: 8px; margin: 0 10px; width: calc(100% - 20px); }
+        .month-item.active { background: var(--primary); color: #fff; font-weight: 700; border-radius: 8px; margin: 0 10px; width: calc(100% - 20px); }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .header { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
-        .header-title { font-size: 22px; font-weight: bold; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+        .header { background: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+        .header-title { font-size: 22px; font-weight: 700; }
         .header-title span { color: var(--primary); font-size: 18px; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .pc-toggle-label { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: bold; cursor: pointer; background: #e2e8f0; padding: 6px 12px; border-radius: 20px; }
+        .header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .pc-toggle-label { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; cursor: pointer; background: #e2e8f0; padding: 6px 12px; border-radius: 20px; }
+        .btn-logout { border: none; background: none; color: #9f1239; cursor: pointer; font-weight: 700; font-size: 14px; }
         .content-scroll { flex: 1; overflow-y: auto; padding: 25px; }
+
+        /* 桌機版：新增案件按鈕 */
+        .btn-add-header { display: none; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; background: var(--primary); color: #fff; border: none; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px -6px rgba(99,102,241,0.7); }
+        .btn-add-header:hover { background: #4f46e5; }
+        /* 手機版：浮動新增按鈕 */
+        .btn-add-fab { display: none; position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 500; align-items: center; gap: 8px; padding: 14px 20px; border: none; border-radius: 999px; background: var(--primary); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 24px -6px rgba(99,102,241,0.65); }
 
         /* 手機版月份切換列 (僅 1023px 以下、非電腦版視圖時顯示) */
         .mobile-month-bar { display: none; }
-        .mobile-year-select { background: #f1f5f9; border: 1px solid var(--border); color: var(--text-main); font-size: 14px; font-weight: bold; padding: 7px 8px; border-radius: 20px; outline: none; cursor: pointer; flex: 0 0 auto; }
+        .mobile-year-select { background: #f1f5f9; border: 1px solid var(--border); color: var(--text-main); font-size: 14px; font-weight: 700; padding: 7px 8px; border-radius: 20px; outline: none; cursor: pointer; flex: 0 0 auto; }
         .mobile-month-scroll { display: flex; gap: 6px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
         .mobile-month-scroll::-webkit-scrollbar { display: none; }
-        .mobile-month-chip { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; font-size: 14px; font-weight: 500; color: var(--tag-notclosed); background: #f1f5f9; border: none; cursor: pointer; white-space: nowrap; }
-        .mobile-month-chip.active { background: var(--primary); color: white; font-weight: bold; }
+        .mobile-month-chip { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; font-size: 14px; font-weight: 500; color: #64748b; background: #f1f5f9; border: none; cursor: pointer; white-space: nowrap; }
+        .mobile-month-chip.active { background: var(--primary); color: #fff; font-weight: 700; }
 
-        /* 篩選與新增 */
-        .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-input, .user-filter { padding: 10px 15px; border: 1px solid var(--border); border-radius: 20px; outline: none; }
-        .user-filter { background: white; font-weight: bold; cursor: pointer; }
-        .tag { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; border: 1px solid transparent; }
-        .tag.all { background: #e0e7ff; color: var(--primary); }
-        .tag.active { background: #fef3c7; color: var(--tag-active); }
-        .tag.measured { background: #d1fae5; color: var(--tag-measured); }
-        .tag.notclosed { background: #f1f5f9; color: var(--tag-notclosed); }
-        .tag.untrackable { background: #fee2e2; color: var(--tag-untrackable); }
-        .tag.overdue { background: #ffe4e6; color: #e11d48; border: 1px solid #fda4af; }
-        .tag.dealt { background: #ede9fe; color: var(--tag-dealt); }
+        /* 篩選 */
+        .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .search-input, .user-filter { padding: 10px 15px; border: 1px solid var(--border); border-radius: 20px; outline: none; font-size: 14px; color: var(--text-main); }
+        .user-filter { background: #fff; font-weight: 700; cursor: pointer; }
+        .tag { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+        .tag.all { background: #e0e7ff; color: #4338ca; }
+        .tag.active { background: #fef3c7; color: #b45309; }
+        .tag.measured { background: #d1fae5; color: #047857; }
+        .tag.notclosed { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .tag.untrackable { background: #fecdd3; color: #9f1239; border-color: #fda4af; }
+        .tag.overdue { background: #ffe4e6; color: #e11d48; border-color: #fda4af; }
+        .tag.dealt { background: #ede9fe; color: #6d28d9; }
         .tag.selected { border-color: currentColor; box-shadow: 0 0 0 1px currentColor; }
 
-        .quick-add-panel { background: var(--dark-panel); padding: 15px 25px; border-radius: 12px; display: flex; gap: 10px; align-items: flex-end; margin-bottom: 25px; flex-wrap: wrap; }
-        .qa-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
-        .qa-group label { color: #94a3b8; font-size: 12px; font-weight: 500; }
-        .qa-input, .qa-select { background: var(--dark-input); border: 1px solid #475569; color: white; padding: 10px 12px; border-radius: 6px; outline: none; font-size: 14px; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; height: 39px; }
-        
-        .manager-badge { background: #f43f5e; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
+        /* 每月統計列 */
+        .stats-bar { display: flex; gap: 10px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none; }
+        .stats-bar::-webkit-scrollbar { display: none; }
+        .stat-card { flex: 0 0 auto; min-width: 96px; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 3px; }
+        .stat-label { font-size: 12px; color: #64748b; font-weight: 500; white-space: nowrap; }
+        .stat-value { font-size: 19px; font-weight: 700; white-space: nowrap; color: var(--text-main); }
+        .stat-card.tone-active .stat-value { color: #b45309; }
+        .stat-card.tone-measured .stat-value { color: #047857; }
+        .stat-card.tone-notclosed .stat-value { color: #b91c1c; }
+        .stat-card.tone-untrackable .stat-value { color: #9f1239; }
+        .stat-card.tone-dealt .stat-value { color: #6d28d9; }
+        .stat-card.tone-amount { background: linear-gradient(135deg, #eef2ff, #e0e7ff); border-color: #c7d2fe; }
+        .stat-card.tone-amount .stat-value { color: var(--primary); }
+
+        .manager-badge { background: #f43f5e; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px; }
 
         /* 卡片 */
         .records-list { display: flex; flex-direction: column; gap: 15px; padding-bottom: 50px; }
-        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; position: relative; }
+        .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; position: relative; overflow: hidden; }
+        .card-body { display: flex; flex-direction: column; gap: 15px; padding: 20px; }
+        .card-head { display: none; align-items: stretch; gap: 12px; padding: 14px 16px; cursor: pointer; }
+        .status-bar { width: 5px; border-radius: 99px; flex: 0 0 auto; background: var(--st-bar, #64748b); }
+        .card-head-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+        .card-head-top { display: flex; align-items: center; gap: 8px; }
+        .card-name { font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-head-sub { font-size: 12px; color: #64748b; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .card-head-sub .dot { color: var(--text-sub); }
+        .card-head-sub .warn { color: #b91c1c; font-weight: 700; }
+        .card-head-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+        .card-chevron { flex: 0 0 auto; align-self: center; color: var(--text-sub); transition: transform 0.2s ease; }
+        .card.expanded .card-chevron { transform: rotate(180deg); }
+
         .form-group { display: flex; flex-direction: column; gap: 5px; }
-        .form-group label { font-size: 12px; font-weight: bold; color: var(--text-sub); }
-        .form-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; background: #f8fafc; outline: none; color: var(--text-main); width: 100%; }
+        .form-group label { font-size: 13px; font-weight: 700; color: #64748b; }
+        .form-group label.mt { margin-top: 10px; }
+        .form-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; color: var(--text-main); width: 100%; }
+        .form-input:focus { border-color: var(--primary); background: #fff; }
         .form-input:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
-        .track-textarea { height: 50px; resize: vertical; font-family: inherit; }
+        .track-textarea { height: 52px; resize: vertical; line-height: 1.5; }
+        .track-group { display: flex; flex-direction: column; gap: 5px; }
+        .track-row { display: flex; gap: 5px; align-items: flex-start; }
+        .track-index { font-size: 12px; color: var(--text-sub); padding-top: 9px; min-width: 15px; }
+        .card-date { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+        .card-name-input { font-size: 16px; font-weight: 700; border: none; background: transparent; padding: 0; margin-bottom: 5px; }
+        .card-name-input:focus { background: #f1f5f9; }
+        .card-name-input:disabled { background: transparent; }
+        .amount-input { font-size: 18px; font-weight: 700; }
 
-        .user-select-badge { background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; border: none; outline: none; cursor: pointer; width: fit-content; }
+        .user-select-badge { background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; border: none; outline: none; cursor: pointer; width: fit-content; }
         .user-select-badge:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
-        
-        .status-select { font-weight: bold; cursor: pointer; border-width: 2px; }
-        .s-active { color: var(--tag-active); border-color: #fde68a; background: #fffbeb; }
-        .s-measured { color: var(--tag-measured); border-color: #a7f3d0; background: #ecfdf5; }
-        .s-notclosed { color: var(--tag-notclosed); border-color: #cbd5e1; background: #f8fafc; }
-        .s-untrackable { color: var(--tag-untrackable); border-color: #fecaca; background: #fef2f2; }
-        .s-dealt { color: var(--tag-dealt); border-color: #ddd6fe; background: #f5f3ff; }
-        .urgent-date { border-color: var(--tag-untrackable) !important; background: #fff5f5 !important; color: var(--tag-untrackable); font-weight: bold; }
 
-        .btn-delete-card { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
+        .status-select { font-weight: 700; border-width: 2px; color: var(--st-fg); background: var(--st-bg); border-color: var(--st-border); }
+        .status-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap; color: var(--st-fg); background: var(--st-bg); }
+        .status-select, .status-pill, .status-bar, .card-head { --st-fg: #475569; --st-bg: #f8fafc; --st-border: #cbd5e1; --st-bar: #64748b; }
+        /* 各狀態色票（未成交／無法追蹤皆為紅色系，深淺區分） */
+        .st-active { --st-fg: #b45309; --st-bg: #fef3c7; --st-border: #fde68a; --st-bar: #f59e0b; }
+        .st-measured { --st-fg: #047857; --st-bg: #d1fae5; --st-border: #a7f3d0; --st-bar: #10b981; }
+        .st-notClosed { --st-fg: #b91c1c; --st-bg: #fee2e2; --st-border: #fecaca; --st-bar: #dc2626; }
+        .st-untrackable { --st-fg: #9f1239; --st-bg: #fecdd3; --st-border: #fda4af; --st-bar: #9f1239; }
+        .st-dealt { --st-fg: #6d28d9; --st-bg: #ede9fe; --st-border: #ddd6fe; --st-bar: #8b5cf6; }
+
+        .urgent-date { border-color: #fca5a5 !important; background: #fff5f5 !important; color: #b91c1c !important; font-weight: 700; }
+        .badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+        .badge-overdue { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .badge-soon { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-none { background: #fee2e2; color: #b91c1c; border: 1px dashed #fca5a5; }
+        .track-badge { margin-top: 6px; }
+
+        .btn-delete-card { background: #fee2e2; color: #b91c1c; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
         .btn-delete-card:hover { background: #fecaca; }
 
-        @media (min-width: 1024px) { 
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; background: #fff; border: 1px dashed var(--border); border-radius: 12px; font-size: 14px; }
+
+        /* 新增案件（獨立介面） */
+        #add-modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9500; }
+        #add-modal.open { display: flex; }
+        .add-card { background: #fff; width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .add-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); background: var(--bg-sidebar); }
+        .add-title { font-size: 18px; font-weight: 700; color: #fff; }
+        .btn-icon-close { border: none; background: rgba(255,255,255,0.12); color: #fff; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+        .add-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .add-foot { padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: #f8fafc; }
+        .qa-group { display: flex; flex-direction: column; gap: 6px; }
+        .qa-group label { font-size: 13px; font-weight: 700; color: #64748b; }
+        .qa-input, .qa-select { background: #f8fafc; border: 1px solid var(--border); color: var(--text-main); padding: 11px 12px; border-radius: 8px; outline: none; font-size: 15px; width: 100%; }
+        .qa-input:focus, .qa-select:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+        .btn-save { background: var(--primary); color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; }
+        .btn-save:hover { background: #4f46e5; }
+
+        @media (min-width: 1024px) {
+            .btn-add-header { display: inline-flex; }
             body.desktop-mode .sidebar { display: flex; }
-            body.desktop-mode .card { display: grid; grid-template-columns: 140px 100px 120px 180px 220px 150px 140px; padding: 15px 20px; gap: 15px; align-items: start;}
-            .col-person, .track-group { display: flex; flex-direction: column; gap: 5px; }
+            /* 7 欄對應 7 個區塊，並自動撐滿寬度（右側不再留白） */
+            body.desktop-mode .card-body {
+                display: grid;
+                grid-template-columns: minmax(112px, 0.95fr) minmax(84px, 0.6fr) minmax(104px, 0.82fr) minmax(170px, 1.9fr) minmax(180px, 1.72fr) minmax(126px, 1.02fr) minmax(118px, 0.98fr);
+                gap: 15px; align-items: start; padding: 15px 20px;
+            }
+            body.desktop-mode .col-person { display: flex; flex-direction: column; gap: 5px; }
+            #add-modal.open { align-items: center; justify-content: center; padding: 24px; }
+            .add-card { width: 100%; max-width: 580px; height: auto; max-height: 90vh; border-radius: 14px; overflow: hidden; }
+            .add-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+            .add-body .qa-group.full { grid-column: 1 / -1; }
+            .add-foot { display: flex; justify-content: flex-end; }
+            .btn-save { width: auto; }
+        }
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            body.desktop-mode .card-body {
+                grid-template-columns: minmax(100px, 0.95fr) minmax(76px, 0.6fr) minmax(96px, 0.8fr) minmax(144px, 1.75fr) minmax(152px, 1.65fr) minmax(116px, 1fr) minmax(108px, 0.95fr);
+                gap: 12px;
+            }
         }
         @media (max-width: 1023px) {
+            .content-scroll { padding: 14px; }
+            .header { padding: 12px 14px; }
+            .header-title { font-size: 18px; }
+            .btn-add-fab { display: inline-flex; }
             body:not(.desktop-mode) .sidebar { display: none; }
-            body:not(.desktop-mode) .mobile-month-bar { display: flex; align-items: center; gap: 8px; background: white; border-bottom: 1px solid var(--border); padding: 8px 12px; flex-shrink: 0; }
-            body:not(.desktop-mode) .quick-add-panel { flex-direction: column; align-items: stretch; }
+            body:not(.desktop-mode) .mobile-month-bar { display: flex; align-items: center; gap: 8px; background: #fff; border-bottom: 1px solid var(--border); padding: 8px 12px; flex-shrink: 0; }
+            /* 手機只看進度：卡片預設為摘要，點一下才展開編輯 */
+            body:not(.desktop-mode) .card-head { display: flex; }
+            body:not(.desktop-mode) .card-body { display: none; padding: 16px; border-top: 1px solid var(--border); }
+            body:not(.desktop-mode) .card.expanded .card-body { display: flex; }
+            body:not(.desktop-mode) .records-list { padding-bottom: 110px; }
         }
     </style>
 </head>
@@ -110,7 +209,7 @@
 
 <div id="login-section">
     <div class="login-box">
-        <h2 style="margin-bottom: 25px; color: var(--bg-sidebar);">歐昇門市系統</h2>
+        <h2>歐昇門市系統</h2>
         <input type="text" id="loginAccount" placeholder="請輸入帳號 (例如: jie)">
         <input type="password" id="loginPwd" placeholder="請輸入密碼">
         <button class="btn-login" id="btnLogin">安全登入</button>
@@ -135,9 +234,13 @@
         <header class="header">
             <div class="header-left"><div class="header-title" id="displayYM">2026年 8月 <span>公司件</span></div></div>
             <div class="header-right">
-                <span style="font-weight:bold; font-size:14px;">👤 <span id="currentUserDisplay"></span><span id="roleBadge"></span></span>
+                <span style="font-weight:700; font-size:14px;">👤 <span id="currentUserDisplay"></span><span id="roleBadge"></span></span>
+                <button class="btn-add-header" id="btnOpenAddDesktop">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    新增案件
+                </button>
                 <label class="pc-toggle-label"><input type="checkbox" id="pcToggle"> 💻 電腦版視圖</label>
-                <button id="btnLogout" style="border:none; background:none; color:var(--tag-untrackable); cursor:pointer; font-weight:bold;">登出</button>
+                <button class="btn-logout" id="btnLogout">登出</button>
             </div>
         </header>
 
@@ -159,31 +262,46 @@
                 <div class="tag overdue" data-filter="overdue">🚨 全域逾期未追蹤</div>
             </div>
 
-            <div class="quick-add-panel" id="quickAddPanel">
-                <div class="qa-group" style="flex:0.5;"><label>日期</label><input type="date" id="qaDate" class="qa-input"></div>
-                <div class="qa-group" style="flex:0.5;"><label>負責人</label><select id="qaUser" class="qa-select"></select></div>
-                <div class="qa-group"><label>客戶名稱</label><input type="text" id="qaName" class="qa-input" placeholder="名稱"></div>
-                <div class="qa-group"><label>聯絡方式</label><input type="text" id="qaPhone" class="qa-input" placeholder="電話/LINE"></div>
-                <div class="qa-group" style="flex:1;"><label>需求備註</label><input type="text" id="qaInfo" class="qa-input" placeholder="客廳調光簾..."></div>
-                
-                <div class="qa-group" style="flex:0.6;">
-                    <label>案件狀態</label>
-                    <select id="qaStatus" class="qa-select">
-                        <option value="active">跟進中</option>
-                        <option value="measured">已約丈量</option>
-                        <option value="notClosed">未成交</option>
-                        <option value="untrackable">無法追蹤</option>
-                        <option value="dealt">已成交</option>
-                    </select>
-                </div>
-
-                <div class="qa-group" style="flex:0.5;"><label>下次追蹤日</label><input type="date" id="qaTrackDate" class="qa-input"></div>
-                <button class="btn-save" id="btnQuickAdd">儲存新增</button>
-            </div>
+            <div class="stats-bar" id="statsBar"></div>
 
             <div class="records-list" id="records"></div>
         </div>
     </main>
+</div>
+
+<button class="btn-add-fab" id="btnOpenAddMobile">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    新增案件
+</button>
+
+<div id="add-modal">
+    <div class="add-card">
+        <div class="add-head">
+            <div class="add-title">新增案件</div>
+            <button class="btn-icon-close" id="btnCloseAdd" aria-label="關閉">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="add-body">
+            <div class="qa-group"><label>日期</label><input type="date" id="qaDate" class="qa-input"></div>
+            <div class="qa-group"><label>負責人</label><select id="qaUser" class="qa-select"></select></div>
+            <div class="qa-group full"><label>客戶名稱</label><input type="text" id="qaName" class="qa-input" placeholder="名稱"></div>
+            <div class="qa-group full"><label>聯絡方式</label><input type="text" id="qaPhone" class="qa-input" placeholder="電話/LINE"></div>
+            <div class="qa-group full"><label>需求備註</label><input type="text" id="qaInfo" class="qa-input" placeholder="客廳調光簾..."></div>
+            <div class="qa-group">
+                <label>案件狀態</label>
+                <select id="qaStatus" class="qa-select">
+                    <option value="active">跟進中</option>
+                    <option value="measured">已約丈量</option>
+                    <option value="notClosed">未成交</option>
+                    <option value="untrackable">無法追蹤</option>
+                    <option value="dealt">已成交</option>
+                </select>
+            </div>
+            <div class="qa-group"><label>下次追蹤日</label><input type="date" id="qaTrackDate" class="qa-input"></div>
+        </div>
+        <div class="add-foot"><button class="btn-save" id="btnQuickAdd">儲存新增</button></div>
+    </div>
 </div>
 
 <script type="module">
@@ -207,21 +325,78 @@
 
     const AVAILABLE_YEARS = [2026, 2025];
 
-    let teamMembers = []; 
-    let currentUserName = ""; 
-    let currentUserRole = "staff"; 
-    let customersData = []; 
-    
+    const STATUS_META = {
+        active:      { label: '跟進中',   cls: 'st-active' },
+        measured:    { label: '已約丈量', cls: 'st-measured' },
+        notClosed:   { label: '未成交',   cls: 'st-notClosed' },
+        untrackable: { label: '無法追蹤', cls: 'st-untrackable' },
+        dealt:       { label: '已成交',   cls: 'st-dealt' }
+    };
+
+    let teamMembers = [];
+    let currentUserName = "";
+    let currentUserRole = "staff";
+    let customersData = [];
+
     let currentMonth = new Date().getMonth() + 1;
     let currentFilter = "all";
-    let hasShownAlert = false; 
+    let hasShownAlert = false;
+
+    /* ---------- 小工具 ---------- */
+    function esc(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function todayString() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function shortDate(s) { return String(s || '').slice(5).replace('-', '/'); }
+    function dayDiff(dateStr, baseStr) {
+        if (!dateStr || !baseStr) return NaN;
+        const a = new Date(`${dateStr}T00:00:00`);
+        const b = new Date(`${baseStr}T00:00:00`);
+        if (isNaN(a) || isNaN(b)) return NaN;
+        return Math.round((a - b) / 86400000);
+    }
+    function statusClass(status) { return (STATUS_META[status] || STATUS_META.notClosed).cls; }
+    function statusLabel(status) { return (STATUS_META[status] || STATUS_META.notClosed).label; }
+    /* 追蹤狀態：回傳輸入框樣式、徽章文字（逾期標紅、即將到期標橘） */
+    function trackInfo(data, todayStr) {
+        const result = { inputClass: '', badge: '', note: '', warn: false };
+        if (data.status === 'active') {
+            if (!data.nextTrackDate) {
+                result.badge = '<span class="badge badge-none">未設定追蹤日</span>';
+                result.note = '未設定下次追蹤日';
+                result.warn = true;
+                return result;
+            }
+            const diff = dayDiff(data.nextTrackDate, todayStr);
+            result.note = `下次追蹤 ${shortDate(data.nextTrackDate)}`;
+            if (isNaN(diff)) return result;
+            if (diff < 0) {
+                result.inputClass = 'urgent-date';
+                result.badge = `<span class="badge badge-overdue">已逾期 ${Math.abs(diff)} 天</span>`;
+            } else if (diff === 0) {
+                result.inputClass = 'urgent-date';
+                result.badge = '<span class="badge badge-soon">今天到期</span>';
+            } else if (diff <= 2) {
+                result.inputClass = 'urgent-date';
+                result.badge = `<span class="badge badge-soon">剩 ${diff} 天</span>`;
+            }
+        } else if (data.nextTrackDate) {
+            result.note = `預計追蹤 ${shortDate(data.nextTrackDate)}`;
+        }
+        return result;
+    }
 
     document.getElementById('btnLogin').onclick = async () => {
         const acc = document.getElementById('loginAccount').value.trim();
         const pwd = document.getElementById('loginPwd').value.trim();
-        if(!acc || !pwd) { alert("請輸入帳號與密碼"); return; }
-        try { await signInWithEmailAndPassword(auth, `${acc}@osheng.tw`, pwd); } 
-        catch(err) { alert("登入失敗，帳號或密碼錯誤！"); }
+        if (!acc || !pwd) { alert("請輸入帳號與密碼"); return; }
+        try { await signInWithEmailAndPassword(auth, `${acc}@osheng.tw`, pwd); }
+        catch (err) { alert("登入失敗，帳號或密碼錯誤！"); }
     };
 
     document.getElementById('btnLogout').onclick = () => {
@@ -234,24 +409,26 @@
             const q = query(collection(db, "users"), where("email", "==", user.email));
             const qs = await getDocs(q);
             if (qs.empty) { alert("查無此員工資料！"); signOut(auth); return; }
-            
+
             const userData = qs.docs[0].data();
             if (userData.status === 'disabled') { alert("帳號已停用！"); signOut(auth); return; }
 
             currentUserName = userData.name;
-            currentUserRole = userData.role || 'staff'; 
-            
+            currentUserRole = userData.role || 'staff';
+
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'flex';
             document.getElementById('currentUserDisplay').innerText = currentUserName;
-            
-            if (currentUserRole === 'manager') {
+
+            const isManager = currentUserRole === 'manager';
+            if (isManager) {
                 document.getElementById('roleBadge').innerHTML = '<span class="manager-badge">主管</span>';
-                document.getElementById('quickAddPanel').style.display = 'none'; 
             } else {
                 document.getElementById('roleBadge').innerHTML = '';
-                document.getElementById('quickAddPanel').style.display = 'flex';
             }
+            [document.getElementById('btnOpenAddDesktop'), document.getElementById('btnOpenAddMobile')]
+                .forEach(btn => { btn.style.display = isManager ? 'none' : ''; });
+            if (isManager) closeAddModal();
             initSystem();
         } else {
             document.getElementById('login-section').style.display = 'flex';
@@ -260,35 +437,35 @@
     });
 
     function initSystem() {
-        document.getElementById('qaDate').value = new Date().toISOString().split('T')[0];
-        if(window.innerWidth >= 1024) { document.getElementById('pcToggle').checked = true; document.body.classList.add('desktop-mode'); }
+        document.getElementById('qaDate').value = todayString();
+        if (window.innerWidth >= 1024) { document.getElementById('pcToggle').checked = true; document.body.classList.add('desktop-mode'); }
 
         initYearSelects();
         renderSidebar();
-        
+
         onSnapshot(collection(db, "users"), (snapshot) => {
             teamMembers = [];
             const filterSelect = document.getElementById('filterUser');
             const qaSelect = document.getElementById('qaUser');
             filterSelect.innerHTML = '<option value="all">👥 所有人案件</option>';
             qaSelect.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if(data.status === 'active') { 
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.status === 'active') {
                     teamMembers.push(data.name);
-                    filterSelect.innerHTML += `<option value="${data.name}">👤 ${data.name} 的案件</option>`;
-                    qaSelect.innerHTML += `<option value="${data.name}">${data.name}</option>`;
+                    filterSelect.innerHTML += `<option value="${esc(data.name)}">👤 ${esc(data.name)} 的案件</option>`;
+                    qaSelect.innerHTML += `<option value="${esc(data.name)}">${esc(data.name)}</option>`;
                 }
             });
-            if(qaSelect.querySelector(`option[value="${currentUserName}"]`)) qaSelect.value = currentUserName;
-            if(filterSelect.querySelector(`option[value="${currentUserName}"]`)) filterSelect.value = currentUserName;
+            if (qaSelect.querySelector(`option[value="${currentUserName}"]`)) qaSelect.value = currentUserName;
+            if (filterSelect.querySelector(`option[value="${currentUserName}"]`)) filterSelect.value = currentUserName;
         });
 
         onSnapshot(collection(db, "customers"), (snapshot) => {
             customersData = [];
-            snapshot.forEach(doc => customersData.push({ id: doc.id, ...doc.data() }));
-            
+            snapshot.forEach(docSnap => customersData.push({ id: docSnap.id, ...docSnap.data() }));
+
             checkUrgentAlerts();
             renderSidebar();
             renderData();
@@ -324,14 +501,27 @@
     document.getElementById('mobileYearSelect').onchange = (e) => { document.getElementById('yearSelect').value = e.target.value; renderSidebar(); renderData(); };
     document.getElementById('searchInput').oninput = () => renderData();
     document.getElementById('filterUser').onchange = () => renderData();
-    
+
     document.querySelectorAll('.tag').forEach(tag => {
         tag.onclick = (e) => {
             document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
-            e.target.classList.add('selected');
-            currentFilter = e.target.dataset.filter;
+            e.currentTarget.classList.add('selected');
+            currentFilter = e.currentTarget.dataset.filter;
             renderData();
         };
+    });
+
+    /* ---------- 新增案件：獨立介面 ---------- */
+    function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+    function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+    document.getElementById('btnOpenAddDesktop').onclick = openAddModal;
+    document.getElementById('btnOpenAddMobile').onclick = openAddModal;
+    document.getElementById('btnCloseAdd').onclick = closeAddModal;
+    document.getElementById('add-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'add-modal') closeAddModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAddModal();
     });
 
     function renderSidebar() {
@@ -365,13 +555,38 @@
         if (active) scroll.scrollLeft = active.offsetLeft - scroll.clientWidth / 2 + active.clientWidth / 2;
     }
 
+    /* ---------- 每月統計列 ---------- */
+    function renderStats(list, crossMonth) {
+        const counts = { active: 0, measured: 0, notClosed: 0, untrackable: 0, dealt: 0 };
+        let amount = 0;
+        list.forEach(d => {
+            if (counts[d.status] !== undefined) counts[d.status] += 1;
+            const raw = d.amount == null ? '' : String(d.amount).trim();
+            if (raw !== '') { const v = Number(raw); if (!isNaN(v)) amount += v; }
+        });
+
+        const cells = [
+            { label: crossMonth ? '符合案件數' : `${currentMonth}月案件數`, value: list.length, tone: 'total' },
+            { label: '跟進中', value: counts.active, tone: 'active' },
+            { label: '已約丈量', value: counts.measured, tone: 'measured' },
+            { label: '未成交', value: counts.notClosed, tone: 'notclosed' },
+            { label: '無法追蹤', value: counts.untrackable, tone: 'untrackable' },
+            { label: '已成交', value: counts.dealt, tone: 'dealt' },
+            { label: '成交金額合計', value: `$${amount.toLocaleString('zh-TW')}`, tone: 'amount' }
+        ];
+
+        document.getElementById('statsBar').innerHTML = cells
+            .map(c => `<div class="stat-card tone-${c.tone}"><div class="stat-label">${esc(c.label)}</div><div class="stat-value">${esc(c.value)}</div></div>`)
+            .join('');
+    }
+
     function renderData() {
         const container = document.getElementById('records');
         const searchKw = document.getElementById('searchInput').value.toLowerCase().trim();
         const filterUser = document.getElementById('filterUser').value;
         const monthStr = `${document.getElementById('yearSelect').value}-${String(currentMonth).padStart(2, '0')}`;
-        const todayStr = new Date().toISOString().split('T')[0];
-        
+        const todayStr = todayString();
+
         const isManager = currentUserRole === 'manager';
         const disableAttr = isManager ? 'disabled' : '';
 
@@ -381,80 +596,113 @@
         const isSearching = searchKw.length > 0;
         const isOverdueFilter = currentFilter === 'overdue';
 
-        const filtered = customersData.filter(data => {
+        // 統計範圍：月份 + 搜尋 + 負責人（不受狀態標籤影響）
+        const scoped = customersData.filter(data => {
             if (!data.createDate) return false;
-
-            // 若在搜尋中或查看逾期，直接無視單一月份限制 (matchMonth = true)
             const matchMonth = (isSearching || isOverdueFilter) ? true : data.createDate.startsWith(monthStr);
-
-            const matchSearch = (data.caseName||"").toLowerCase().includes(searchKw) || 
-                                (data.info||"").toLowerCase().includes(searchKw) || 
-                                (data.phone||"").toLowerCase().includes(searchKw);
-            
+            const matchSearch = (data.caseName || "").toLowerCase().includes(searchKw) ||
+                                (data.info || "").toLowerCase().includes(searchKw) ||
+                                (data.phone || "").toLowerCase().includes(searchKw);
             const matchUser = filterUser === 'all' || data.responsible === filterUser;
-            
-            let matchStatus = false;
-            if (currentFilter === 'all') matchStatus = true;
-            else if (currentFilter === 'overdue') {
-                // 跨月份顯示所有已逾期的「跟進中」案件
-                if (data.status === 'active' && data.nextTrackDate) {
-                    if (data.nextTrackDate < todayStr) matchStatus = true;
-                }
-            } else matchStatus = (data.status === currentFilter);
+            return matchMonth && matchSearch && matchUser;
+        });
 
-            return matchMonth && matchSearch && matchUser && matchStatus;
+        renderStats(scoped, isSearching || isOverdueFilter);
+
+        const filtered = scoped.filter(data => {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'overdue') {
+                // 跨月份顯示所有已逾期的「跟進中」案件
+                return data.status === 'active' && !!data.nextTrackDate && data.nextTrackDate < todayStr;
+            }
+            return data.status === currentFilter;
         });
 
         filtered.sort((a, b) => new Date(b.createDate) - new Date(a.createDate));
 
-        filtered.forEach(data => {
-            let trackInputStyle = "";
-            if (data.status === 'active' && data.nextTrackDate) {
-                const diff = Math.ceil((new Date(data.nextTrackDate) - new Date()) / (1000 * 60 * 60 * 24));
-                if (diff <= 2) trackInputStyle = "urgent-date";
-            }
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">目前沒有符合條件的案件</div>';
+            return;
+        }
 
-            const statusClassMap = { 'active': 's-active', 'measured': 's-measured', 'notClosed': 's-notclosed', 'untrackable': 's-untrackable', 'dealt': 's-dealt' };
-            const userOptions = teamMembers.map(m => `<option value="${m}" ${m === data.responsible ? 'selected' : ''}>${m}</option>`).join('');
-            
+        filtered.forEach(data => {
+            const meta = STATUS_META[data.status] || STATUS_META.notClosed;
+            const track = trackInfo(data, todayStr);
+            const userOptions = teamMembers.map(m => `<option value="${esc(m)}" ${m === data.responsible ? 'selected' : ''}>${esc(m)}</option>`).join('');
+            const trackBadgeHtml = track.badge ? `<div class="track-badge">${track.badge}</div>` : '';
+
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div class="col-person">
-                    <div style="font-size:12px; color:var(--text-sub);">${data.createDate}</div>
-                    <input type="text" class="form-input field-update" style="font-size:16px; font-weight:bold; border:none; background:transparent; padding:0; margin-bottom:5px;" value="${data.caseName || ''}" data-id="${data.id}" data-field="caseName" ${disableAttr}>
-                    <select class="user-select-badge field-update" data-id="${data.id}" data-field="responsible" ${disableAttr}>${userOptions}</select>
+                <div class="card-head">
+                    <span class="status-bar ${meta.cls}"></span>
+                    <div class="card-head-main">
+                        <div class="card-head-top">
+                            <span class="card-name">${esc(data.caseName) || '未命名客戶'}</span>
+                            <span class="status-pill ${meta.cls}">${esc(meta.label)}</span>
+                        </div>
+                        <div class="card-head-sub">
+                            <span>${esc(data.createDate)}</span>
+                            <span class="dot">·</span>
+                            <span>${esc(data.responsible) || '未指派'}</span>
+                            ${track.note ? `<span class="dot">·</span><span class="${track.warn ? 'warn' : ''}">${esc(track.note)}</span>` : ''}
+                        </div>
+                        ${track.badge ? `<div class="card-head-badges">${track.badge}</div>` : ''}
+                    </div>
+                    <svg class="card-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
-                <div class="form-group"><label>成交金額</label><input type="number" class="form-input field-update" value="${data.amount || ''}" style="font-size:18px; font-weight:bold;" data-id="${data.id}" data-field="amount" ${disableAttr}></div>
-                <div class="form-group">
-                    <label>聯絡方式</label><input type="text" class="form-input field-update" value="${data.phone || ''}" placeholder="電話/LINE" data-id="${data.id}" data-field="phone" ${disableAttr}>
-                    <label style="margin-top:5px;">需求備註</label><textarea class="form-input track-textarea field-update" data-id="${data.id}" data-field="info" ${disableAttr}>${data.info || ''}</textarea>
-                </div>
-                <div class="track-group">
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">1.</span><textarea class="form-input track-textarea field-update" data-id="${data.id}" data-field="track1" placeholder="追蹤紀錄1" ${disableAttr}>${data.track1 || ''}</textarea></div>
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">2.</span><textarea class="form-input track-textarea field-update" data-id="${data.id}" data-field="track2" placeholder="追蹤紀錄2" ${disableAttr}>${data.track2 || ''}</textarea></div>
-                    <div style="display:flex; gap:5px; align-items:flex-start;"><span style="font-size:12px; color:var(--text-sub); padding-top:4px;">3.</span><textarea class="form-input track-textarea field-update" data-id="${data.id}" data-field="track3" placeholder="追蹤紀錄3" ${disableAttr}>${data.track3 || ''}</textarea></div>
-                </div>
-                <div class="form-group">
-                    <label>案件狀態</label>
-                    <select class="form-input status-select field-update ${statusClassMap[data.status]}" data-id="${data.id}" data-field="status" ${disableAttr}>
-                        <option value="active" ${data.status === 'active'?'selected':''}>跟進中</option>
-                        <option value="measured" ${data.status === 'measured'?'selected':''}>已約丈量</option>
-                        <option value="notClosed" ${data.status === 'notClosed'?'selected':''}>未成交</option>
-                        <option value="untrackable" ${data.status === 'untrackable'?'selected':''}>無法追蹤</option>
-                        <option value="dealt" ${data.status === 'dealt'?'selected':''}>已成交</option>
-                    </select>
-                    <label style="margin-top:10px;">下次預計追蹤日</label>
-                    <input type="date" class="form-input field-update ${trackInputStyle}" value="${data.nextTrackDate || ''}" data-id="${data.id}" data-field="nextTrackDate" ${disableAttr}>
-                </div>
-                <div class="form-group">
-                    <label>丈量日 / 人員</label>
-                    <input type="date" class="form-input field-update" style="margin-bottom:5px;" value="${data.measureDate || ''}" data-id="${data.id}" data-field="measureDate" ${disableAttr}>
-                    <input type="text" class="form-input field-update" placeholder="人員姓名" value="${data.measurePerson || ''}" data-id="${data.id}" data-field="measurePerson" ${disableAttr}>
-                    ${!isManager ? `<button class="btn-delete-card" data-delete-id="${data.id}">🗑️ 刪除案件</button>` : ''}
+                <div class="card-body">
+                    <div class="col-person">
+                        <div class="card-date">${esc(data.createDate)}</div>
+                        <input type="text" class="form-input card-name-input field-update" value="${esc(data.caseName || '')}" placeholder="客戶名稱" data-id="${esc(data.id)}" data-field="caseName" ${disableAttr}>
+                        <select class="user-select-badge field-update" data-id="${esc(data.id)}" data-field="responsible" ${disableAttr}>${userOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>成交金額</label>
+                        <input type="number" class="form-input amount-input field-update" value="${esc(data.amount || '')}" data-id="${esc(data.id)}" data-field="amount" ${disableAttr}>
+                    </div>
+                    <div class="form-group">
+                        <label>聯絡方式</label>
+                        <input type="text" class="form-input field-update" value="${esc(data.phone || '')}" placeholder="電話/LINE" data-id="${esc(data.id)}" data-field="phone" ${disableAttr}>
+                    </div>
+                    <div class="form-group">
+                        <label>需求備註</label>
+                        <textarea class="form-input track-textarea field-update" placeholder="需求、偏好、注意事項..." data-id="${esc(data.id)}" data-field="info" ${disableAttr}>${esc(data.info || '')}</textarea>
+                    </div>
+                    <div class="track-group">
+                        <div class="track-row"><span class="track-index">1.</span><textarea class="form-input track-textarea field-update" data-id="${esc(data.id)}" data-field="track1" placeholder="追蹤紀錄1" ${disableAttr}>${esc(data.track1 || '')}</textarea></div>
+                        <div class="track-row"><span class="track-index">2.</span><textarea class="form-input track-textarea field-update" data-id="${esc(data.id)}" data-field="track2" placeholder="追蹤紀錄2" ${disableAttr}>${esc(data.track2 || '')}</textarea></div>
+                        <div class="track-row"><span class="track-index">3.</span><textarea class="form-input track-textarea field-update" data-id="${esc(data.id)}" data-field="track3" placeholder="追蹤紀錄3" ${disableAttr}>${esc(data.track3 || '')}</textarea></div>
+                    </div>
+                    <div class="form-group">
+                        <label>案件狀態</label>
+                        <select class="form-input status-select field-update ${meta.cls}" data-id="${esc(data.id)}" data-field="status" ${disableAttr}>
+                            <option value="active" ${data.status === 'active' ? 'selected' : ''}>跟進中</option>
+                            <option value="measured" ${data.status === 'measured' ? 'selected' : ''}>已約丈量</option>
+                            <option value="notClosed" ${data.status === 'notClosed' ? 'selected' : ''}>未成交</option>
+                            <option value="untrackable" ${data.status === 'untrackable' ? 'selected' : ''}>無法追蹤</option>
+                            <option value="dealt" ${data.status === 'dealt' ? 'selected' : ''}>已成交</option>
+                        </select>
+                        <label class="mt">下次預計追蹤日</label>
+                        <input type="date" class="form-input field-update ${track.inputClass}" value="${esc(data.nextTrackDate || '')}" data-id="${esc(data.id)}" data-field="nextTrackDate" ${disableAttr}>
+                        ${trackBadgeHtml}
+                    </div>
+                    <div class="form-group">
+                        <label>丈量日 / 人員</label>
+                        <input type="date" class="form-input field-update" value="${esc(data.measureDate || '')}" data-id="${esc(data.id)}" data-field="measureDate" ${disableAttr}>
+                        <input type="text" class="form-input field-update" placeholder="人員姓名" value="${esc(data.measurePerson || '')}" data-id="${esc(data.id)}" data-field="measurePerson" ${disableAttr}>
+                        ${!isManager ? `<button class="btn-delete-card" data-delete-id="${esc(data.id)}">🗑️ 刪除案件</button>` : ''}
+                    </div>
                 </div>
             `;
             container.appendChild(card);
+        });
+
+        // 手機：點摘要列展開／收合卡片
+        container.querySelectorAll('.card-head').forEach(head => {
+            head.addEventListener('click', () => {
+                head.closest('.card').classList.toggle('expanded');
+            });
         });
 
         // 綁定編輯與更新事件
@@ -464,7 +712,7 @@
                     const id = e.target.dataset.id;
                     const field = e.target.dataset.field;
                     let val = e.target.value;
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    const nowStr = todayString();
                     const rowData = customersData.find(d => d.id === id);
 
                     if (!rowData) return;
@@ -472,25 +720,25 @@
                     if (field === 'status' && val === 'active') {
                         if (!rowData.nextTrackDate) {
                             alert("⚠️ 狀態切換為「跟進中」時，必須填寫「下次預計追蹤日」！請先設定日期。");
-                            e.target.value = rowData.status; 
+                            e.target.value = rowData.status;
                             return;
                         }
                     }
 
                     if (rowData.status === 'active' && (field === 'track1' || field === 'track2' || field === 'track3') && val.trim() !== "") {
-                        if (!rowData.nextTrackDate || rowData.nextTrackDate <= todayStr) {
+                        if (!rowData.nextTrackDate || rowData.nextTrackDate <= nowStr) {
                             const newDate = prompt("⚠️ 您新增了追蹤紀錄，請輸入「下一次」的預計追蹤日期 (格式 YYYY-MM-DD，需大於今天)：", "");
-                            if (newDate && newDate > todayStr) {
+                            if (newDate && newDate > nowStr) {
                                 await updateDoc(doc(db, "customers", id), { nextTrackDate: newDate });
                             } else {
                                 alert("日期無效或小於今日，追蹤紀錄無法儲存。");
-                                e.target.value = rowData[field] || ''; 
+                                e.target.value = rowData[field] || '';
                                 return;
                             }
                         }
                     }
 
-                    if(id && field) {
+                    if (id && field) {
                         try {
                             await updateDoc(doc(db, "customers", id), { [field]: val });
                         } catch (error) {
@@ -503,7 +751,7 @@
 
             container.querySelectorAll('.btn-delete-card').forEach(btn => {
                 btn.onclick = async (e) => {
-                    const deleteId = e.target.dataset.deleteId;
+                    const deleteId = e.currentTarget.dataset.deleteId;
                     if (deleteId && confirm("確定要刪除這筆客戶紀錄嗎？此動作無法復原。")) {
                         await deleteDoc(doc(db, "customers", deleteId));
                     }
@@ -520,37 +768,40 @@
         const info = document.getElementById('qaInfo').value.trim();
         const status = document.getElementById('qaStatus').value;
         const tDate = document.getElementById('qaTrackDate').value;
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = todayString();
 
         if (!name) { alert("請輸入客戶名稱！"); return; }
-        
-        if (status === 'active' && (!tDate || tDate <= todayStr)) { 
-            alert("⚠️ 狀態為「跟進中」時，請務必選擇大於今天的「下次追蹤日」！"); return; 
+
+        if (status === 'active' && (!tDate || tDate <= todayStr)) {
+            alert("⚠️ 狀態為「跟進中」時，請務必選擇大於今天的「下次追蹤日」！"); return;
         }
 
         await addDoc(collection(db, "customers"), {
             createDate: date, caseName: name, responsible: resp, phone: phone,
             info: info, nextTrackDate: tDate, track1: "", track2: "", track3: "",
-            status: status, measureDate: "", measurePerson: "", amount: "" 
+            status: status, measureDate: "", measurePerson: "", amount: ""
         });
-        
-        document.getElementById('qaName').value = ""; document.getElementById('qaPhone').value = ""; 
-        document.getElementById('qaInfo').value = ""; document.getElementById('qaTrackDate').value = "";
-        document.getElementById('qaStatus').value = "active"; 
-        
+
+        document.getElementById('qaName').value = "";
+        document.getElementById('qaPhone').value = "";
+        document.getElementById('qaInfo').value = "";
+        document.getElementById('qaTrackDate').value = "";
+        document.getElementById('qaStatus').value = "active";
+
         ensureYearOptions(date.split('-')[0]);
         document.getElementById('yearSelect').value = date.split('-')[0];
         currentMonth = parseInt(date.split('-')[1], 10);
         document.getElementById('filterUser').value = "all";
         renderSidebar();
-        document.querySelector('.tag.all').click(); 
+        document.querySelector('.tag.all').click();
+        closeAddModal();
     };
 
     function checkUrgentAlerts() {
         const alertList = document.getElementById('alert-list');
         alertList.innerHTML = "";
         let hasUrgent = false;
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = todayString();
         const isManager = currentUserRole === 'manager';
 
         if (isManager) document.getElementById('alert-header').innerText = "⚠️ 全公司逾期追蹤名單";
@@ -559,27 +810,26 @@
         customersData.forEach(data => {
             if (data.status === 'active') {
                 if (isManager || data.responsible === currentUserName) {
+                    const respName = isManager ? ` <span style="background:#e0e7ff;color:#4338ca;padding:2px 6px;border-radius:4px;font-size:12px;">${esc(data.responsible)}</span>` : '';
                     if (data.nextTrackDate) {
-                        const diffDays = Math.ceil((new Date(data.nextTrackDate) - new Date(todayStr)) / (1000 * 60 * 60 * 24));
-                        if (diffDays <= 2) {
+                        const diffDays = dayDiff(data.nextTrackDate, todayStr);
+                        if (!isNaN(diffDays) && diffDays <= 2) {
                             hasUrgent = true;
-                            let txt = diffDays < 0 ? `<span style="color:red; font-weight:bold;">已逾期 ${Math.abs(diffDays)} 天沒追蹤！</span>` : `剩餘 ${diffDays} 天`;
+                            let txt = diffDays < 0 ? `<span style="color:#b91c1c; font-weight:bold;">已逾期 ${Math.abs(diffDays)} 天沒追蹤！</span>` : `剩餘 ${diffDays} 天`;
                             if (diffDays === 0) txt = "就是今天！";
-                            const respName = isManager ? ` <span style="background:#e0e7ff;color:#4338ca;padding:2px 6px;border-radius:4px;font-size:12px;">${data.responsible}</span>` : '';
-                            alertList.innerHTML += `<div class="urgent-item"><strong>${data.caseName}</strong> ${respName}<br>預計日：${data.nextTrackDate} (${txt})</div>`;
+                            alertList.innerHTML += `<div class="urgent-item"><strong>${esc(data.caseName)}</strong> ${respName}<br>預計日：${esc(data.nextTrackDate)} (${txt})</div>`;
                         }
                     } else {
                         hasUrgent = true;
-                        const respName = isManager ? ` <span style="background:#e0e7ff;color:#4338ca;padding:2px 6px;border-radius:4px;font-size:12px;">${data.responsible}</span>` : '';
-                        alertList.innerHTML += `<div class="urgent-item"><strong>${data.caseName}</strong> ${respName}<br><span style="color:red; font-weight:bold;">⚠️ 狀態為跟進中，但未填寫追蹤日期！</span></div>`;
+                        alertList.innerHTML += `<div class="urgent-item"><strong>${esc(data.caseName)}</strong> ${respName}<br><span style="color:#b91c1c; font-weight:bold;">⚠️ 狀態為跟進中，但未填寫追蹤日期！</span></div>`;
                     }
                 }
             }
         });
-        
+
         if (hasUrgent && !hasShownAlert) {
             document.getElementById('alert-modal').style.display = 'flex';
-            hasShownAlert = true; 
+            hasShownAlert = true;
         }
     }
 </script>
